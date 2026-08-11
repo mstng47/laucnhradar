@@ -7,11 +7,15 @@ summarized and ranked by Claude.
 
 1. `npm install`
 2. Copy `.env.example` to `.env` and fill in your keys (see below for where to get each one).
-3. Run the pipeline once manually to check it works:
+3. If you want digest entries persisted to Supabase, run `supabase/schema.sql`
+   once in your Supabase project's SQL Editor to create the `digest_entries` table.
+4. Run the pipeline once manually to check it works:
    ```
    node scripts/run-pipeline.mjs
    ```
-4. Check `output/latest.json` — that's your digest, ready to email or render.
+5. Check `output/latest.json` — that's your digest, ready to email or render.
+   If `SUPABASE_URL`/`SUPABASE_KEY` are set, the same entries are also
+   upserted into the `digest_entries` table (deduplicated by date + url).
 
 ## Where to get each key
 
@@ -34,7 +38,5 @@ run-pipeline.mjs  → runs both steps in sequence, writes output/latest.json
 
 ## Next steps after this works locally
 
-- Push to GitHub, add a GitHub Actions workflow to run `run-pipeline.mjs` on a daily cron
-- Add Supabase writes so results persist and a Next.js site can read them
 - Add Resend to send the digest as an email
 - Add Stripe for the premium tier

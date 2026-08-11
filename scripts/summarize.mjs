@@ -3,6 +3,7 @@
 
 import { readFile, writeFile } from "fs/promises";
 import Anthropic from "@anthropic-ai/sdk";
+import { createClient } from "@supabase/supabase-js";
 import "dotenv/config";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -42,6 +43,30 @@ async function summarize(rawItems) {
   return JSON.parse(cleaned);
 }
 
+async function saveToSupabase(output) {
+  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+    console.warn("No SUPABASE_URL/SUPABASE_KEY set — skipping Supabase write.");
+    return;
+  }
+
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
+
+  const rows = output.entries.map((entry) => ({
+    digest_date: output.date,
+    title: entry.title,
+    url: entry.url,
+    summary: entry.summary,
+    source: entry.source,
+  }));
+
+  const { error } = await supabase
+    .from("digest_entries")
+    .upsert(rows, { onConflict: "digest_date,url" });
+
+  if (error) throw new Error(`Supabase write failed: ${error.message}`);
+  console.log(`Saved ${rows.length} entries → Supabase (digest_entries)`);
+}
+
 async function main() {
   const raw = JSON.parse(await readFile("output/raw.json", "utf-8"));
 
@@ -59,6 +84,9 @@ async function main() {
 
   await writeFile("output/latest.json", JSON.stringify(output, null, 2));
   console.log(`Summarized ${digest.length} entries → output/latest.json`);
+
+  await saveToSupabase(output);
+
   return output;
 }
 

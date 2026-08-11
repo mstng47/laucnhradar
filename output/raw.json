@@ -1,11 +1,18 @@
 {
-  "collectedAt": "2026-08-11T20:21:59.383Z",
+  "collectedAt": "2026-08-11T20:49:21.569Z",
   "items": [
+    {
+      "source": "hackernews",
+      "title": "Show HN: Cut LLM turns in MCP interactions by 75%+",
+      "url": "https://github.com/Tura-AI/tura",
+      "points": 8,
+      "comments": 0
+    },
     {
       "source": "hackernews",
       "title": "My agent hacked my gym",
       "url": "http://web.archive.org/web/20260516025532/https://www.affinda.com/expert-insights/when-my-ai-agent-hacked-my-gym-mythos-stopped-feeling-theoretical/",
-      "points": 1,
+      "points": 2,
       "comments": 1
     },
     {
@@ -19,7 +26,7 @@
       "source": "hackernews",
       "title": "Rocky Linux Founder Kurtzer Launches OpenWALDO to Open Up AI Training Data",
       "url": "https://techstrong.ai/articles/rocky-linux-founder-gregory-kurtzer-launches-openwaldo-to-open-up-ai-training-data/",
-      "points": 2,
+      "points": 3,
       "comments": 0
     },
     {
@@ -61,7 +68,7 @@
       "source": "hackernews",
       "title": "MAI-Code-1.1-Flash: Better, faster, at a quarter of the cost",
       "url": "https://microsoft.ai/news/mai-code-1-1-flash-br-better-faster-at-a-quarter-of-the-cost/",
-      "points": 3,
+      "points": 4,
       "comments": 0
     },
     {
@@ -69,7 +76,7 @@
       "title": "Misaligned AIs could use killer robots to take over",
       "url": "https://www.lesswrong.com/posts/9jKhqmFjMzdAvHANr/misaligned-ais-could-use-killer-robots-to-take-over",
       "points": 3,
-      "comments": 1
+      "comments": 2
     },
     {
       "source": "hackernews",
@@ -97,7 +104,7 @@
       "title": "AI models are breaking out of their cages. Their creators are scrambling",
       "url": "https://www.washingtonpost.com/technology/2026/08/10/openai-anthropic-under-pressure-explain-ai-hacking-sprees/",
       "points": 3,
-      "comments": 0
+      "comments": 1
     },
     {
       "source": "hackernews",
@@ -110,8 +117,8 @@
       "source": "hackernews",
       "title": "The whole of PyTorch on one page",
       "url": "https://tensor.khalilli.ai/blog/part-0-the-map/",
-      "points": 23,
-      "comments": 5
+      "points": 29,
+      "comments": 6
     },
     {
       "source": "hackernews",
@@ -136,16 +143,9 @@
     },
     {
       "source": "hackernews",
-      "title": "Lean Eval for Alignment on Faithfulness",
-      "url": "https://www.millenniumresearch.ai/leanscreen.html#catch",
-      "points": 103,
-      "comments": 4
-    },
-    {
-      "source": "hackernews",
       "title": "Previous-Token Prediction Based LLM Near-Exact Prompt Reconstruction",
       "url": "https://arxiv.org/abs/2607.29378",
-      "points": 1,
+      "points": 2,
       "comments": 0
     },
     {
@@ -272,13 +272,6 @@
       "title": "Stealing Reasoning Traces from Proprietary LLM APIs [pdf]",
       "url": "https://stolen-thoughts.com/paper.pdf",
       "points": 3,
-      "comments": 1
-    },
-    {
-      "source": "hackernews",
-      "title": "Leanroute Is Live One AI Gateway for Models and Tools",
-      "url": "https://news.ycombinator.com/item?id=49259812",
-      "points": 1,
       "comments": 1
     },
     {
