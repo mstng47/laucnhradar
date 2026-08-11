@@ -6,6 +6,13 @@
 # Dependencies
 node_modules/
 
+# Next.js
+.next/
+out/
+
+# Vercel
+.vercel
+
 # Claude Code local settings
 .claude/settings.local.json
 

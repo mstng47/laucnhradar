@@ -1,0 +1,69 @@
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+h1 {
+  margin-bottom: 0.25rem;
+}
+
+.subtitle {
+  color: #666;
+  margin-top: 0;
+  margin-bottom: 2rem;
+}
+
+.error {
+  color: #b00020;
+}
+
+h2 {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #888;
+  margin: 2rem 0 0.75rem;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  padding: 0.9rem 0;
+  border-top: 1px solid #e5e5e5;
+}
+
+li a {
+  font-weight: 600;
+  color: inherit;
+  text-decoration: none;
+}
+
+li a:hover {
+  text-decoration: underline;
+}
+
+li p {
+  margin: 0.35rem 0 0.35rem;
+  color: #444;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: capitalize;
+}
