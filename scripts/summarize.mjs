@@ -44,10 +44,25 @@ async function summarize(rawItems) {
 }
 
 async function saveToSupabase(output) {
+  const inCI = process.env.GITHUB_ACTIONS === "true";
+
   if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
-    console.warn("No SUPABASE_URL/SUPABASE_KEY set — skipping Supabase write.");
+    const message =
+      "SUPABASE_URL/SUPABASE_KEY not set — skipping Supabase write. " +
+      "Check the secret names match exactly (Settings → Secrets and variables → Actions).";
+    if (inCI) {
+      // A plain console.warn is easy to miss in a green run — this renders
+      // as a visible annotation on the workflow run summary page instead.
+      console.log(`::error::${message}`);
+      throw new Error(message);
+    }
+    console.warn(message);
     return;
   }
+
+  console.log(
+    `Connecting to Supabase at ${process.env.SUPABASE_URL} with a ${process.env.SUPABASE_KEY.length}-char key…`
+  );
 
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 
@@ -59,12 +74,32 @@ async function saveToSupabase(output) {
     source: entry.source,
   }));
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("digest_entries")
-    .upsert(rows, { onConflict: "digest_date,url" });
+    .upsert(rows, { onConflict: "digest_date,url" })
+    .select();
 
-  if (error) throw new Error(`Supabase write failed: ${error.message}`);
-  console.log(`Saved ${rows.length} entries → Supabase (digest_entries)`);
+  if (error) {
+    // Postgrest errors carry more detail than `message` alone — surface all
+    // of it so a wrong key type / RLS / schema mismatch is diagnosable from
+    // the log instead of a bare "write failed".
+    const details = [
+      `message=${error.message}`,
+      error.code && `code=${error.code}`,
+      error.details && `details=${error.details}`,
+      error.hint && `hint=${error.hint}`,
+    ]
+      .filter(Boolean)
+      .join(" | ");
+    const fullMessage = `Supabase write failed: ${details}`;
+    if (inCI) console.log(`::error::${fullMessage}`);
+    throw new Error(fullMessage);
+  }
+
+  const savedCount = data?.length ?? rows.length;
+  const message = `Saved ${savedCount} entries → Supabase (digest_entries) for ${output.date}`;
+  console.log(message);
+  if (inCI) console.log(`::notice::${message}`);
 }
 
 async function main() {
