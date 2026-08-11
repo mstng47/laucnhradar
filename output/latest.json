@@ -1,0 +1,54 @@
+{
+  "date": "2026-08-11",
+  "generatedAt": "2026-08-11T20:22:08.350Z",
+  "entries": [
+    {
+      "title": "The whole of PyTorch on one page",
+      "url": "https://tensor.khalilli.ai/blog/part-0-the-map/",
+      "summary": "A comprehensive visual map of PyTorch concepts and relationships designed to help developers navigate the framework's ecosystem. This resource condenses complex topics into an accessible reference guide for both beginners and experienced practitioners.",
+      "source": "hackernews"
+    },
+    {
+      "title": "Lean Eval for Alignment on Faithfulness",
+      "url": "https://www.millenniumresearch.ai/leanscreen.html#catch",
+      "summary": "A formal evaluation framework for assessing whether AI models faithfully represent their reasoning and outputs. This tool addresses a critical need for developers building trustworthy AI systems by providing measurable alignment guarantees.",
+      "source": "hackernews"
+    },
+    {
+      "title": "MAI-Code-1.1-Flash: Better, faster, at a quarter of the cost",
+      "url": "https://microsoft.ai/news/mai-code-1-1-flash-br-better-faster-at-a-quarter-of-the-cost/",
+      "summary": "Microsoft released an improved code generation model that delivers faster inference and lower costs than its predecessor. Developers building AI-assisted coding tools can now access better performance economics.",
+      "source": "hackernews"
+    },
+    {
+      "title": "Show HN: Webstractor – Pay-as-You-Go Web Data API for AI Agents",
+      "url": "https://webstractor.com/",
+      "summary": "A serverless API that extracts structured data from websites for AI agents and applications. This removes the friction of web scraping and data parsing, letting developers focus on building agent logic rather than data infrastructure.",
+      "source": "hackernews"
+    },
+    {
+      "title": "Show HN: ExtractBench, an open-source schema extraction benchmark",
+      "url": "https://github.com/run-llama/ExtractBench",
+      "summary": "An open benchmark for evaluating how well AI models extract structured data according to predefined schemas. Developers can use this to measure and compare extraction accuracy across different models and approaches.",
+      "source": "hackernews"
+    },
+    {
+      "title": "Search over the Visual World: off-the-shelf VLMs beat video embeddings",
+      "url": "https://arxiv.org/abs/2608.08075",
+      "summary": "Research showing that vision language models outperform traditional embedding approaches for video search tasks. This finding helps developers choose the right approach when building visual search and retrieval systems.",
+      "source": "hackernews"
+    },
+    {
+      "title": "Show HN: HyperSAE – Hyperbolic Sparse Autoencoders for LLM Interpretability",
+      "url": "https://github.com/vishal-dehurdle/hypersae",
+      "summary": "A novel technique combining hyperbolic geometry with sparse autoencoders to better understand what LLMs learn internally. Researchers and developers working on model transparency and safety can use this to inspect model behavior more effectively.",
+      "source": "hackernews"
+    },
+    {
+      "title": "Show HN: Chopi, a macOS filesystem+network sandbox to unleash your agents",
+      "url": "https://github.com/danra/chopi",
+      "summary": "A sandboxing tool that lets developers safely run AI agents with controlled filesystem and network access on macOS. This enables testing autonomous agents without exposing the full system to potentially unsafe operations.",
+      "source": "hackernews"
+    }
+  ]
+}

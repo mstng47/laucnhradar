@@ -1,0 +1,397 @@
+{
+  "collectedAt": "2026-08-11T20:21:59.383Z",
+  "items": [
+    {
+      "source": "hackernews",
+      "title": "My agent hacked my gym",
+      "url": "http://web.archive.org/web/20260516025532/https://www.affinda.com/expert-insights/when-my-ai-agent-hacked-my-gym-mythos-stopped-feeling-theoretical/",
+      "points": 1,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: Personal AI Policy Directory",
+      "url": "https://howiai.directory/",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Rocky Linux Founder Kurtzer Launches OpenWALDO to Open Up AI Training Data",
+      "url": "https://techstrong.ai/articles/rocky-linux-founder-gregory-kurtzer-launches-openwaldo-to-open-up-ai-training-data/",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "How to Migrate from Airtable to Obsidian",
+      "url": "https://obsidian.md/help/import/airtable",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "NVIDIA & partners to mobilize over $500B of third-party capital for AI buildout",
+      "url": "https://nvidianews.nvidia.com/news/nvidia-partners-with-apollo-blackrock-blackstone-brookfield-goldman-sachs-and-kkr-to-establish-ai-compute-infrastructure-financing-platforms-to-mobilize-over-500-billion-of-third-party-capital",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "AI Found a Zoom Takeover Flaw in Fewer Than 20 Prompts",
+      "url": "https://ai-updates.net/ai-found-zoom-takeover-flaw-20-prompts/",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "OpenRouter is a example of the Application layer of AI",
+      "url": "https://s-1.vercel.app/posts/why-openrouter-can-be-the-next-great/",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Next-Token Predictor Is An AI's Job, Not Its Species",
+      "url": "https://www.astralcodexten.com/p/next-token-predictor-is-an-ais-job",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "MAI-Code-1.1-Flash: Better, faster, at a quarter of the cost",
+      "url": "https://microsoft.ai/news/mai-code-1-1-flash-br-better-faster-at-a-quarter-of-the-cost/",
+      "points": 3,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Misaligned AIs could use killer robots to take over",
+      "url": "https://www.lesswrong.com/posts/9jKhqmFjMzdAvHANr/misaligned-ais-could-use-killer-robots-to-take-over",
+      "points": 3,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "The Society of Professional Journalists proposes edits to code of ethics for AI",
+      "url": "https://www.niemanlab.org/2026/08/the-society-of-professional-journalists-proposes-edits-to-its-code-of-ethics-for-the-ai-age/",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "You Don't Need to Use Cloud AI Switchyard and Nemotron (Level1/Wendell) [video]",
+      "url": "https://www.youtube.com/watch?v=-IGB6Avxwgo",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "On Comments",
+      "url": "https://blog.helsing.ai/posts/on-comments/",
+      "points": 4,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "AI models are breaking out of their cages. Their creators are scrambling",
+      "url": "https://www.washingtonpost.com/technology/2026/08/10/openai-anthropic-under-pressure-explain-ai-hacking-sprees/",
+      "points": 3,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: Webstractor – Pay-as-You-Go Web Data API for AI Agents",
+      "url": "https://webstractor.com/",
+      "points": 3,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "The whole of PyTorch on one page",
+      "url": "https://tensor.khalilli.ai/blog/part-0-the-map/",
+      "points": 23,
+      "comments": 5
+    },
+    {
+      "source": "hackernews",
+      "title": "Designing Connection Authentication for C1 Bridge",
+      "url": "https://www.c1.ai/engineering/designing-connection-authentication-for-c1-bridge",
+      "points": 3,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Can you trust what AI tells you? [video]",
+      "url": "https://www.youtube.com/watch?v=cIMlBw2nqfA",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: HeyDeacon, AI customer support agent for SaaS founders",
+      "url": "https://heydeacon.com",
+      "points": 4,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "Lean Eval for Alignment on Faithfulness",
+      "url": "https://www.millenniumresearch.ai/leanscreen.html#catch",
+      "points": 103,
+      "comments": 4
+    },
+    {
+      "source": "hackernews",
+      "title": "Previous-Token Prediction Based LLM Near-Exact Prompt Reconstruction",
+      "url": "https://arxiv.org/abs/2607.29378",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "The Day We Almost Let a Bot Lose Us a Loyal Customer",
+      "url": "https://cacm.acm.org/blogcacm/the-day-we-almost-let-a-bot-lose-us-a-loyal-customer/",
+      "points": 3,
+      "comments": 3
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: ThinkingType, an eval measuring if fonts change VLM judgments",
+      "url": "https://github.com/wdanfort/thinkingtype",
+      "points": 3,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "Search over the Visual World: off-the-shelf VLMs beat video embeddings",
+      "url": "https://arxiv.org/abs/2608.08075",
+      "points": 6,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: HyperSAE – Hyperbolic Sparse Autoencoders for LLM Interpretability",
+      "url": "https://github.com/vishal-dehurdle/hypersae",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Ask HN: How do you keep 54 LLM workflows on the right models?",
+      "url": "https://news.ycombinator.com/item?id=49262312",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Imprint – Fine-tune MoE LLMs bigger than your RAM",
+      "url": "https://github.com/sigma0101111/imprint",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "The worst part of using multiple LLM providers is not the API differences",
+      "url": "https://github.com/maximhq/bifrost",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Proving Muse Glimmer in Zero-Knowledge at 85 Tok/S on an H100",
+      "url": "https://attestable.com/blog/proving-llms-scale",
+      "points": 4,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Ask HN: Any good alternatives to Claude that are just not Claude?",
+      "url": "https://news.ycombinator.com/item?id=49262048",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Ask HN: Are third party gguf/mmproj safe on Llama in production env",
+      "url": "https://news.ycombinator.com/item?id=49261767",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "A compiler that turns a day at my computer into agent memory, no LLM",
+      "url": "https://github.com/nossa-y/activity-frames",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "The Download: the next big thing in LLMs and how AI academic research is shifti",
+      "url": "https://www.technologyreview.com/2026/08/11/1141610/the-download-next-big-thing-llms-ai-academic-research-shifting/",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: ExtractBench, an open-source schema extraction benchmark",
+      "url": "https://github.com/run-llama/ExtractBench",
+      "points": 6,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: Lambdock – Wayland-native GTK4 dock with a live Lisp REPL",
+      "url": "https://codeberg.org/jjba23/lambdock",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Subtle LLM Bias and Shaping Narratives: A Look at Critical Papers",
+      "url": "https://read.misalignedmag.com/subtle-llm-bias-and-shaping-narratives-a-look-at-critical-papers-06912d7c5343",
+      "points": 1,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: Pickle – token efficient AI agent browser with policy-gated actions",
+      "url": "https://picklebrowser.com/",
+      "points": 3,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "The Vertical AI Bubble: We Keep Forgetting That LLMs Roll Dice",
+      "url": "https://medium.com/@MirArshadTalpur/the-vertical-ai-bubble-we-keep-forgetting-that-llms-roll-dice-2ac707f91c61",
+      "points": 4,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Stealing Reasoning Traces from Proprietary LLM APIs [pdf]",
+      "url": "https://stolen-thoughts.com/paper.pdf",
+      "points": 3,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "Leanroute Is Live One AI Gateway for Models and Tools",
+      "url": "https://news.ycombinator.com/item?id=49259812",
+      "points": 1,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "Ask HN: What is your biggest bottleneck when developing with agents",
+      "url": "https://news.ycombinator.com/item?id=49263602",
+      "points": 1,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: Secure HyperDHT-based agent=>human declarative credentials requester",
+      "url": "https://peardrop.fyi/",
+      "points": 3,
+      "comments": 1
+    },
+    {
+      "source": "hackernews",
+      "title": "URLs aren't strings, and my recent encounter with this",
+      "url": "https://utcc.utoronto.ca/~cks/space/blog/web/URLsAreNotStringsMyCase",
+      "points": 4,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Understanding an AI agent's memory through Harry Potter",
+      "url": "https://squidler.io/blog/agent-memory-harry-potter",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "My home internet died for half a day. So did every agent I had",
+      "url": "https://bostrat.ai/blog/the-outage",
+      "points": 5,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "TDD inside the agent loop – theater or actual value?",
+      "url": "https://martinfowler.com/articles/exploring-gen-ai/tdd-in-the-agent-loop.html",
+      "points": 3,
+      "comments": 2
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: Experimentation platform for simulating agents as users",
+      "url": "https://docs.514.ax/0.5.0-rp",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: Hybrid memory retrieval for coding agents",
+      "url": "https://github.com/yaminbakoh4-dot/NexusMem",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Ask HN: What are your thoughts on E2E software development using AI agents?",
+      "url": "https://news.ycombinator.com/item?id=49261790",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "The Path to Recursive Self-Improving Agents",
+      "url": "https://github.com/D2I-ai/awesome-recursive-self-improving-agents",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Ask HN: What email provider do you recommend for personal email?",
+      "url": "https://news.ycombinator.com/item?id=49261634",
+      "points": 1,
+      "comments": 13
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: Chopi, a macOS filesystem+network sandbox to unleash your agents",
+      "url": "https://github.com/danra/chopi",
+      "points": 4,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Cursor and SpaceXAI launch Grok Bot for work beyond coding",
+      "url": "https://runtimewire.com/article/cursor-spacexai-launch-grok-bot-general-purpose-agents",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Verifrog – a Verilog/SystemVerilog testing framework an AI agent can drive",
+      "url": "https://github.com/bryancostanich/verifrog",
+      "points": 2,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "ByteDance Seed: Seed-2.0-Code for Agentic Coding",
+      "url": "https://openrouter.ai/bytedance-seed/seed-2.0-code",
+      "points": 1,
+      "comments": 0
+    },
+    {
+      "source": "hackernews",
+      "title": "Can Claude Code in a loop improve an enterprise AI agent with $10,745 of budget?",
+      "url": "https://jeremytian.substack.com/p/can-claude-code-in-a-loop-improve",
+      "points": 5,
+      "comments": 4
+    }
+  ]
+}
