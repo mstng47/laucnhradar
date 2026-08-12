@@ -1,5 +1,5 @@
 import Link from "next/link";
-import SiteHeader from "../../components/SiteHeader";
+import PageIntro from "../../components/PageIntro";
 import BriefingList from "../../components/BriefingList";
 import { getEntriesForDate } from "../../lib/data";
 import { formatDate, estimateReadingMinutes } from "../../lib/format";
@@ -35,7 +35,7 @@ export default async function ArchiveDate({ params }) {
 
   return (
     <>
-      <SiteHeader subtitle={formatDate(date, { weekday: "long" })} meta={meta} />
+      <PageIntro eyebrow={formatDate(date, { weekday: "long" })} meta={meta} />
       <main className="container">
         <p className="back-row">
           <Link href="/archive" className="back-link">
@@ -43,10 +43,10 @@ export default async function ArchiveDate({ params }) {
           </Link>
         </p>
 
-        {loadError && <p className="error card">Couldn&apos;t load this briefing: {loadError}</p>}
+        {loadError && <p className="error">Couldn&apos;t load this briefing: {loadError}</p>}
 
         {!loadError && entries.length === 0 && (
-          <p className="empty-state card">No briefing was saved for this date.</p>
+          <p className="empty-state">No briefing was saved for this date.</p>
         )}
 
         {!loadError && entries.length > 0 && <BriefingList entries={entries} />}

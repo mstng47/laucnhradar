@@ -25,6 +25,11 @@ alter table digest_entries alter column headline set not null;
 alter table digest_entries alter column what_happened set not null;
 alter table digest_entries alter column why_it_matters set not null;
 
+-- Estimated minutes to read the ORIGINAL linked article (not the briefing
+-- item itself). Best-effort and often unknown — paywalled or unreachable
+-- articles simply leave this null — so it stays nullable.
+alter table digest_entries add column if not exists article_read_minutes integer;
+
 create index if not exists digest_entries_digest_date_idx
   on digest_entries (digest_date desc);
 

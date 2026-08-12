@@ -1,5 +1,5 @@
 import Link from "next/link";
-import SiteHeader from "../components/SiteHeader";
+import PageIntro from "../components/PageIntro";
 import { getArchiveDates } from "../lib/data";
 import { formatDate } from "../lib/format";
 
@@ -22,19 +22,17 @@ export default async function Archive() {
 
   return (
     <>
-      <SiteHeader subtitle="Every past briefing, by date" />
+      <PageIntro eyebrow="Every past briefing, by date" />
       <main className="container">
-        {loadError && <p className="error card">Couldn&apos;t load the archive: {loadError}</p>}
+        {loadError && <p className="error">Couldn&apos;t load the archive: {loadError}</p>}
 
-        {!loadError && dates.length === 0 && (
-          <p className="empty-state card">No briefings yet.</p>
-        )}
+        {!loadError && dates.length === 0 && <p className="empty-state">No briefings yet.</p>}
 
         {!loadError && dates.length > 0 && (
           <ul className="archive-list">
             {dates.map(({ date, count }) => (
               <li key={date}>
-                <Link href={`/archive/${date}`} className="card archive-row">
+                <Link href={`/archive/${date}`} className="archive-row">
                   <span className="archive-date">{formatDate(date, { weekday: "long" })}</span>
                   <span className="archive-count">
                     {count} item{count === 1 ? "" : "s"}
