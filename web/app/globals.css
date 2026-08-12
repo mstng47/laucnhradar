@@ -1,39 +1,86 @@
+/* Mobile first: this is read on a phone each morning, so the small-screen
+   layout is the default and desktop only widens it. */
+
 :root {
   color-scheme: light dark;
+  --text: #1a1a1a;
+  --text-soft: #4a4a4a;
+  --text-faint: #6b6b6b;
+  --rule: #e2e2e2;
+  --accent: #0b57d0;
+  --error: #b00020;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #ededed;
+    --text-soft: #c4c4c4;
+    --text-faint: #9a9a9a;
+    --rule: #333;
+    --accent: #8ab4f8;
+  }
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* 17px keeps body text comfortable on a phone without zooming. */
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--text);
+  -webkit-text-size-adjust: 100%;
 }
 
 main {
-  max-width: 640px;
+  max-width: 38rem;
   margin: 0 auto;
-  padding: 2rem 1.25rem 4rem;
+  padding: 1.5rem 1.15rem 4rem;
 }
 
 h1 {
-  margin-bottom: 0.25rem;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  margin: 0 0 0.2rem;
 }
 
 .subtitle {
-  color: #666;
-  margin-top: 0;
-  margin-bottom: 2rem;
+  color: var(--text-faint);
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+}
+
+.backlink {
+  margin: 0 0 1.75rem;
+  font-size: 0.95rem;
+}
+
+.backlink a {
+  color: var(--accent);
+  text-decoration: none;
+  /* Generous tap target for thumbs. */
+  display: inline-block;
+  padding: 0.4rem 0;
+}
+
+.backlink a:hover {
+  text-decoration: underline;
 }
 
 .error {
-  color: #b00020;
+  color: var(--error);
 }
 
+/* Date heading */
 h2 {
-  font-size: 0.95rem;
+  font-size: 0.78rem;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #888;
-  margin: 2rem 0 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--text-faint);
+  margin: 2.25rem 0 0.5rem;
 }
 
 ul {
@@ -43,27 +90,83 @@ ul {
 }
 
 li {
-  padding: 0.9rem 0;
-  border-top: 1px solid #e5e5e5;
+  padding: 1.15rem 0;
+  border-top: 1px solid var(--rule);
 }
 
-li a {
-  font-weight: 600;
-  color: inherit;
+li > a {
+  display: block;
+  font-weight: 650;
+  font-size: 1.08rem;
+  line-height: 1.35;
+  color: var(--text);
   text-decoration: none;
+  /* Long URLs and headlines must never push the page sideways. */
+  overflow-wrap: anywhere;
 }
 
-li a:hover {
+li > a:hover {
   text-decoration: underline;
 }
 
 li p {
-  margin: 0.35rem 0 0.35rem;
-  color: #444;
+  margin: 0.5rem 0 0;
+  color: var(--text-soft);
+}
+
+.why {
+  color: var(--text);
+  border-left: 3px solid var(--rule);
+  padding-left: 0.8rem;
+}
+
+.terms {
+  margin: 0.75rem 0 0;
+  padding: 0;
+}
+
+.terms li {
+  padding: 0.3rem 0;
+  border-top: none;
+  font-size: 0.92rem;
+  color: var(--text-soft);
 }
 
 .meta {
-  font-size: 0.8rem;
-  color: #888;
-  text-transform: capitalize;
+  display: inline-block;
+  margin-top: 0.7rem;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+/* Glossary page */
+.glossary {
+  margin: 0;
+}
+
+.glossary > div {
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--rule);
+}
+
+.glossary dt {
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.glossary dd {
+  margin: 0.25rem 0 0;
+  color: var(--text-soft);
+}
+
+@media (min-width: 40rem) {
+  body {
+    font-size: 18px;
+  }
+  main {
+    padding: 2.5rem 1.5rem 5rem;
+  }
+  h1 {
+    font-size: 2rem;
+  }
 }

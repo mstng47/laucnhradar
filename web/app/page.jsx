@@ -1,25 +1,16 @@
-import { createClient } from "@supabase/supabase-js";
+import Link from "next/link";
+import { getSupabaseClient } from "./supabase";
 
 // Data changes daily via the pipeline's cron — always fetch fresh rather
 // than serving a build-time snapshot.
 export const dynamic = "force-dynamic";
 
 async function getEntries() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-  if (!url || !key) {
-    throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY " +
-        "— add them to web/.env.local (see web/.env.example)."
-    );
-  }
-
-  const supabase = createClient(url, key);
+  const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
     .from("digest_entries")
-    .select("id, title, url, summary, source, digest_date")
+    .select("id, headline, what_happened, why_it_matters, new_terms, url, source, digest_date")
     .order("digest_date", { ascending: false })
     .order("id", { ascending: false })
     .limit(50);
@@ -50,7 +41,10 @@ export default async function Home() {
   return (
     <main>
       <h1>LaunchRadar</h1>
-      <p className="subtitle">Daily digest of new AI tool launches</p>
+      <p className="subtitle">Your daily AI briefing</p>
+      <p className="backlink">
+        <Link href="/glossary">Glossary →</Link>
+      </p>
 
       {loadError && <p className="error">Couldn&apos;t load the digest: {loadError}</p>}
 
@@ -64,9 +58,19 @@ export default async function Home() {
               {items.map((entry) => (
                 <li key={entry.id}>
                   <a href={entry.url} target="_blank" rel="noreferrer noopener">
-                    {entry.title}
+                    {entry.headline}
                   </a>
-                  <p>{entry.summary}</p>
+                  <p>{entry.what_happened}</p>
+                  <p className="why">{entry.why_it_matters}</p>
+                  {entry.new_terms?.length > 0 && (
+                    <ul className="terms">
+                      {entry.new_terms.map((t) => (
+                        <li key={t.term}>
+                          <strong>{t.term}:</strong> {t.definition}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   <span className="meta">{entry.source}</span>
                 </li>
               ))}

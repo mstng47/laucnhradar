@@ -1,54 +1,58 @@
 {
-  "date": "2026-08-11",
-  "generatedAt": "2026-08-11T22:20:59.820Z",
+  "date": "2026-08-12",
+  "generatedAt": "2026-08-12T17:30:40.993Z",
   "entries": [
     {
-      "title": "Cut LLM turns in MCP interactions by 75%+",
-      "url": "https://github.com/Tura-AI/tura",
-      "summary": "Tura reduces the number of LLM calls needed for Model Context Protocol interactions by over three-quarters, dramatically cutting latency and costs for AI agent development. This optimization directly impacts performance for developers building production AI systems.",
-      "source": "hackernews"
+      "headline": "Elon Musk's AI can now log into your accounts and work",
+      "url": "https://www.theverge.com/ai-artificial-intelligence/978666/spacexai-grok-bot-ai-agent-beta-launch",
+      "source": "The Verge AI",
+      "what_happened": "xAI launched Grok Bot, an AI agent that can sign into your apps and websites and complete multi-step tasks for you, like a virtual coworker.",
+      "why_it_matters": "AI agents that log into systems on a person's behalf are exactly the kind of access risk your company's identity and access management products exist to control, so this is a live example of the problem you're selling a solution for.",
+      "new_terms": [
+        {
+          "term": "AI agent",
+          "definition": "Software that can take actions and complete tasks on its own, not just answer questions like a chatbot."
+        }
+      ]
     },
     {
-      "title": "The whole of PyTorch on one page",
-      "url": "https://tensor.khalilli.ai/blog/part-0-the-map/",
-      "summary": "A comprehensive visual guide mapping PyTorch's entire ecosystem on a single page, making it easier for developers to understand relationships between libraries and find relevant tools for their ML projects.",
-      "source": "hackernews"
+      "headline": "New startup builds a control system for company AI agents",
+      "url": "https://www.producthunt.com/products/cohesor",
+      "source": "Product Hunt",
+      "what_happened": "Cohesor launched a product that acts as a central hub to manage and oversee AI agents that businesses use across their systems.",
+      "why_it_matters": "This is essentially a new entrant in the same space your startup operates in — managing what AI agents are allowed to do — so it's worth knowing about for competitive awareness.",
+      "new_terms": [
+        {
+          "term": "control plane",
+          "definition": "A central system used to manage, monitor, and control other systems or software — here, AI agents."
+        }
+      ]
     },
     {
-      "title": "MAI-Code-1.1-Flash: Better, faster, at a quarter of the cost",
-      "url": "https://microsoft.ai/news/mai-code-1-1-flash-br-better-faster-at-a-quarter-of-the-cost/",
-      "summary": "Microsoft's latest code model delivers improved performance with significantly reduced inference costs and latency, making it practical for developers to integrate advanced code generation into production applications.",
-      "source": "hackernews"
+      "headline": "OpenAI says businesses now let AI do the work, not just help",
+      "url": "https://openai.com/index/how-enterprises-put-ai-to-work",
+      "source": "OpenAI Blog",
+      "what_happened": "OpenAI released research showing companies are shifting from using AI as an assistant to letting it independently execute tasks, and identified which businesses are adopting this fastest.",
+      "why_it_matters": "As more companies let AI agents act on their own, they'll need stronger ways to control what those agents can access — directly increasing demand for the kind of product your startup builds.",
+      "new_terms": [
+        {
+          "term": "agentic AI",
+          "definition": "AI that can take multi-step actions and complete tasks on its own, rather than just responding to questions."
+        }
+      ]
     },
     {
-      "title": "Search over the Visual World: off-the-shelf VLMs beat video embeddings",
-      "url": "https://arxiv.org/abs/2608.08075",
-      "summary": "Research showing that pre-trained vision-language models outperform specialized video embeddings for visual search tasks, giving developers a simpler approach to video understanding without custom training.",
-      "source": "hackernews"
-    },
-    {
-      "title": "ExtractBench, an open-source schema extraction benchmark",
-      "url": "https://github.com/run-llama/ExtractBench",
-      "summary": "An open benchmark for evaluating structured data extraction from unstructured text, helping developers benchmark and improve their LLM-based extraction pipelines.",
-      "source": "hackernews"
-    },
-    {
-      "title": "Webstractor – Pay-as-You-Go Web Data API for AI Agents",
-      "url": "https://webstractor.com/",
-      "summary": "A utility API that provides clean web scraping for AI agents on a consumption-based model, removing infrastructure overhead for developers building data-dependent AI systems.",
-      "source": "hackernews"
-    },
-    {
-      "title": "Pickle – token efficient AI agent browser with policy-gated actions",
-      "url": "https://picklebrowser.com/",
-      "summary": "A browser automation tool designed for AI agents that minimizes token usage through intelligent action gating, reducing costs for agents that need to interact with web interfaces.",
-      "source": "hackernews"
-    },
-    {
-      "title": "HeyDeacon, AI customer support agent for SaaS founders",
-      "url": "https://heydeacon.com",
-      "summary": "A pre-built AI customer support agent template for SaaS platforms, letting developers deploy sophisticated support automation without building agents from scratch.",
-      "source": "hackernews"
+      "headline": "Companies are struggling to price and budget for AI",
+      "url": "https://www.bbc.co.uk/news/articles/c872r52x7jgo?at_medium=RSS&at_campaign=rss",
+      "source": "BBC Technology",
+      "what_happened": "Businesses buying AI tools are finding it hard to predict and control what they'll be charged, and the AI companies selling these tools aren't sure how to price them either.",
+      "why_it_matters": "Understanding how AI vendors charge for usage will help you evaluate tools your startup buys, and think through pricing if you ever build AI features into your own product.",
+      "new_terms": [
+        {
+          "term": "tokenomics",
+          "definition": "How AI companies price their services, usually based on 'tokens' — small chunks of text the AI processes."
+        }
+      ]
     }
   ]
 }
