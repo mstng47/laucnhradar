@@ -5,31 +5,25 @@ coding — it's copying, pasting and clicking.
 
 ---
 
-## Add the "article reading time" column
+## Why reading times might not show up right away
 
-This PR makes the daily pipeline estimate how long the *original linked
-article* takes to read, and the website shows it quietly next to the source
-name. The database needs one new column to store that number.
+Each item can show how long the *original linked article* takes to read,
+fetched fresh by the daily pipeline. That number only appears on items from
+briefings generated *after* this feature shipped — older rows in the database
+were written before it existed, so they don't have one and never will.
 
-**Run this before or right after merging this PR — the website reads this
-column on every visit, so until it exists, the briefing page will show an
-error instead of your briefing** (the archive and glossary pages are
-unaffected). It's a one-line, non-destructive change — nothing existing is
-touched or deleted.
+If today's briefing shows no reading times, it just means the automatic
+morning run (07:00 UTC) hasn't happened again yet since this was added.
+Nothing to fix — tomorrow's briefing will have them. If you want them sooner:
 
-1. Go to **https://supabase.com** and open your project.
-2. In the left sidebar, click **SQL Editor**.
-3. Click **New query** (top of the page).
-4. Copy the line below and paste it into the empty box.
-5. Click the green **Run** button (bottom right). It may also say **Run CTRL+Enter**.
-6. You should see **"Success. No rows returned"**. That means it worked.
+1. Go to **https://github.com/mstng47/laucnhradar/actions**
+2. Click **Daily pipeline** in the left sidebar, then **Run workflow** (green
+   button), then **Run workflow** again in the box that appears.
+3. Wait about a minute and refresh your phone's browser tab.
 
-```sql
-alter table digest_entries add column if not exists article_read_minutes integer;
-```
-
-> Safe to run as many times as you like — if the column already exists, this
-> does nothing.
+Some articles (paywalled, or sites that block automated requests) will never
+show a reading time — that's expected, not an error, so the item just quietly
+shows none.
 
 ---
 
