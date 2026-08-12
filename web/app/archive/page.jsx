@@ -1,0 +1,50 @@
+import Link from "next/link";
+import SiteHeader from "../components/SiteHeader";
+import { getArchiveDates } from "../lib/data";
+import { formatDate } from "../lib/format";
+
+export const dynamic = "force-dynamic";
+
+export const metadata = {
+  title: "Archive — LaunchRadar",
+  description: "Every past briefing, by date",
+};
+
+export default async function Archive() {
+  let dates;
+  let loadError;
+
+  try {
+    dates = await getArchiveDates();
+  } catch (err) {
+    loadError = err.message;
+  }
+
+  return (
+    <>
+      <SiteHeader subtitle="Every past briefing, by date" />
+      <main className="container">
+        {loadError && <p className="error card">Couldn&apos;t load the archive: {loadError}</p>}
+
+        {!loadError && dates.length === 0 && (
+          <p className="empty-state card">No briefings yet.</p>
+        )}
+
+        {!loadError && dates.length > 0 && (
+          <ul className="archive-list">
+            {dates.map(({ date, count }) => (
+              <li key={date}>
+                <Link href={`/archive/${date}`} className="card archive-row">
+                  <span className="archive-date">{formatDate(date, { weekday: "long" })}</span>
+                  <span className="archive-count">
+                    {count} item{count === 1 ? "" : "s"}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </main>
+    </>
+  );
+}
