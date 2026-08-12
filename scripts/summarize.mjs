@@ -1,5 +1,5 @@
-// Sends raw.json to Claude, gets back a ranked + summarized digest,
-// writes output/latest.json.
+// Sends raw.json to Claude, gets back a personalized briefing for the one
+// reader described in reader-profile.md, writes output/latest.json.
 
 import { readFile, writeFile } from "fs/promises";
 import Anthropic from "@anthropic-ai/sdk";
@@ -8,26 +8,52 @@ import "dotenv/config";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const SYSTEM_PROMPT = `You curate a daily digest called LaunchRadar for developers who want to
-track new AI tools without browsing Product Hunt and Hacker News themselves.
+const READER_PROFILE_PATH = new URL("./reader-profile.md", import.meta.url);
 
-Given a JSON list of raw items, do the following:
-1. Discard anything not actually about a new AI tool, model, or dev-focused launch.
-2. Rank what's left by how interesting/useful it would be to a developer audience.
-3. Return the top 8 items maximum.
-4. For each, write a 1-2 sentence summary in your own words (never copy the title/tagline verbatim)
-   explaining what it is and why it matters.
+async function loadReaderProfile() {
+  const raw = await readFile(READER_PROFILE_PATH, "utf-8");
+  // Everything above the "---" divider is a note for human editors, not
+  // part of the profile itself — strip it before it reaches the prompt.
+  const afterDivider = raw.split(/^---$/m)[1];
+  return (afterDivider ?? raw).trim();
+}
+
+function buildSystemPrompt(readerProfile) {
+  return `You are writing a daily AI briefing for one specific reader.
+
+READER PROFILE:
+${readerProfile}
+
+From the items below, select ONLY the 3-5 most relevant to this reader.
+Ignore everything else — do not try to cover it all. Prefer things that
+change what they should know or do over things that are merely interesting.
+
+For each item you select, write:
+1. headline: plain English, no jargon, max 10 words
+2. what_happened: one sentence, as if explaining to a smart friend who doesn't work in tech
+3. why_it_matters: one sentence, specific to this reader's field and role — not generic importance
+4. new_terms: any term this reader likely wouldn't know, with a one-line plain
+   definition. Omit this key (or use an empty array) if there are none.
+
+Rules:
+- Never use jargon without defining it in new_terms
+- No hype language ("game-changing", "revolutionary", "massive")
+- If fewer than 3 items are genuinely worth this reader's time, return fewer.
+  An honest short briefing beats a padded one. Zero items is fine on a slow day.
+- Total output must be readable in under 90 seconds
 
 Respond with ONLY a JSON array, no other text, in this exact shape:
-[{"title": "...", "url": "...", "summary": "...", "source": "..."}]`;
+[{"headline": "...", "url": "...", "source": "...", "what_happened": "...", "why_it_matters": "...", "new_terms": [{"term": "...", "definition": "..."}]}]`;
+}
 
 async function summarize(rawItems) {
+  const readerProfile = await loadReaderProfile();
   const message = await anthropic.messages.create({
     // Haiku is fast and cheap — good fit for a daily summarization job like this.
-    // Swap to "claude-sonnet-5" if you want higher-quality summaries and don't mind the cost.
+    // Swap to "claude-sonnet-5" if you want higher-quality judgment on relevance/tone and don't mind the cost.
     model: "claude-haiku-4-5-20251001",
     max_tokens: 2000,
-    system: SYSTEM_PROMPT,
+    system: buildSystemPrompt(readerProfile),
     messages: [
       { role: "user", content: JSON.stringify(rawItems) },
     ],
@@ -68,9 +94,11 @@ async function saveToSupabase(output) {
 
   const rows = output.entries.map((entry) => ({
     digest_date: output.date,
-    title: entry.title,
+    headline: entry.headline,
+    what_happened: entry.what_happened,
+    why_it_matters: entry.why_it_matters,
+    new_terms: entry.new_terms ?? null,
     url: entry.url,
-    summary: entry.summary,
     source: entry.source,
   }));
 

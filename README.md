@@ -1,7 +1,9 @@
 # LaunchRadar
 
-Automated daily digest of new AI tool launches (Product Hunt + Hacker News + GitHub Trending),
-summarized and ranked by Claude.
+An automated daily AI briefing written for one specific reader. Pulls raw
+items from Product Hunt + Hacker News, then Claude selects and rewrites
+only what's relevant to that reader — see `scripts/reader-profile.md` to
+change who it's written for.
 
 ## Setup
 
@@ -31,9 +33,10 @@ HN needs no key — the Algolia search API is public.
 ## Pipeline
 
 ```
-collect.mjs      → pulls raw items from Product Hunt + HN into output/raw.json
-summarize.mjs     → sends raw.json to Claude, returns ranked/summarized digest
-run-pipeline.mjs  → runs both steps in sequence, writes output/latest.json
+collect.mjs         → pulls raw items from Product Hunt + HN into output/raw.json
+summarize.mjs        → sends raw.json + reader-profile.md to Claude, returns the day's briefing
+reader-profile.md    → who the briefing is written for — edit this any time, no code changes needed
+run-pipeline.mjs     → runs both steps in sequence, writes output/latest.json
 ```
 
 ## Next steps after this works locally
