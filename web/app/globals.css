@@ -26,12 +26,16 @@
      via the *-rgb triplets, translucent tints for chips. */
   --teal: #34c9d9;
   --teal-rgb: 52, 201, 217;
+  /* Calmer default for headlines — same hue, dialed back so the page
+     reads quieter at rest; brightens to the full --teal on hover. */
+  --teal-headline: #2ba7b5;
   --violet: #a599d1;
   --violet-rgb: 165, 153, 209;
   --error: #f2867d;
   --error-rgb: 242, 134, 125;
 
   --content-width: 47.5rem; /* ~760px reading column */
+  --content-half: calc(var(--content-width) / 2);
 
   --font-body: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-lora), Georgia, "Times New Roman", serif;
@@ -56,14 +60,75 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Fine grain across the whole page — a single small SVG tile, repeated,
+   so it's one cheap paint rather than a downloaded image file. Kept at a
+   very low opacity so it reads as texture, not a visible pattern. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+}
+
+/* Faint dot grid, margins only — masked out entirely across the reading
+   column so it never sits behind text, and hidden below the width where
+   there's no margin to put it in (see the min-width media query below). */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  display: none;
+  /* Neutral, not an accent colour — this is decoration, and the accents
+     are reserved for things with meaning (see the palette note up top). */
+  background-image: radial-gradient(circle, rgba(36, 49, 74, 0.6) 1px, transparent 1.5px);
+  background-size: 26px 26px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    black 0,
+    black calc(50% - var(--content-half) - 2rem),
+    transparent calc(50% - var(--content-half)),
+    transparent calc(50% + var(--content-half)),
+    black calc(50% + var(--content-half) + 2rem),
+    black 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    black 0,
+    black calc(50% - var(--content-half) - 2rem),
+    transparent calc(50% - var(--content-half)),
+    transparent calc(50% + var(--content-half)),
+    black calc(50% + var(--content-half) + 2rem),
+    black 100%
+  );
+}
+
+/* Only enable the dot grid once there's real margin either side of the
+   column to put it in. */
+@media (min-width: 64rem) {
+  body::after {
+    display: block;
+  }
+}
+
 a {
   color: inherit;
 }
 
+/* padding-left/right only, deliberately — .container is combined with
+   other classes (.page-intro, .header-bar) that set their own vertical
+   padding, and a shorthand `padding` here would silently zero those out
+   whenever this rule happened to be the last one the cascade saw. */
 .container {
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: 0 1rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 main {
@@ -76,9 +141,10 @@ main {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(11, 18, 32, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  /* Solid, not translucent+blurred — backdrop-filter renders inconsistently
+     across browsers and was the likely source of a visible seam. A flat
+     colour that exactly matches the page background can never mismatch. */
+  background: var(--bg);
   border-bottom: 1px solid var(--hairline);
 }
 
@@ -223,13 +289,15 @@ main {
   font-weight: 600;
   font-size: 1.32rem;
   line-height: 1.35;
-  color: var(--teal);
+  color: var(--teal-headline);
   text-decoration: none;
   text-wrap: balance;
   overflow-wrap: anywhere;
+  transition: color 0.2s ease;
 }
 
 .item-headline:hover {
+  color: var(--teal);
   text-decoration: underline;
 }
 
@@ -471,7 +539,8 @@ main {
     font-size: 18px;
   }
   .container {
-    padding: 0 2rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
   }
   main {
     padding: 1.75rem 0 5rem;
