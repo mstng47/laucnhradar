@@ -1,4 +1,4 @@
-import SiteHeader from "./components/SiteHeader";
+import PageIntro from "./components/PageIntro";
 import BriefingList from "./components/BriefingList";
 import { getLatestBriefing } from "./lib/data";
 import { formatDate, estimateReadingMinutes } from "./lib/format";
@@ -32,12 +32,12 @@ export default async function Home() {
 
   return (
     <>
-      <SiteHeader subtitle="Your daily AI briefing" meta={meta} />
+      <PageIntro eyebrow="Your daily AI briefing" meta={meta} />
       <main className="container">
-        {loadError && <p className="error card">Couldn&apos;t load the briefing: {loadError}</p>}
+        {loadError && <p className="error">Couldn&apos;t load the briefing: {loadError}</p>}
 
         {!loadError && entries.length === 0 && (
-          <p className="empty-state card">No briefing yet — check back tomorrow morning.</p>
+          <p className="empty-state">No briefing yet — check back tomorrow morning.</p>
         )}
 
         {!loadError && entries.length > 0 && <BriefingList entries={entries} />}

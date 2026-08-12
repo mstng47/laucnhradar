@@ -1,4 +1,4 @@
-import SiteHeader from "../components/SiteHeader";
+import PageIntro from "../components/PageIntro";
 import GlossaryBrowser from "./GlossaryBrowser";
 import { getGlossaryTerms } from "../lib/data";
 
@@ -27,12 +27,12 @@ export default async function Glossary() {
 
   return (
     <>
-      <SiteHeader subtitle="Every term the briefing has explained, in plain English" meta={meta} />
+      <PageIntro eyebrow="Every term the briefing has explained, in plain English" meta={meta} />
       <main className="container">
-        {loadError && <p className="error card">Couldn&apos;t load the glossary: {loadError}</p>}
+        {loadError && <p className="error">Couldn&apos;t load the glossary: {loadError}</p>}
 
         {!loadError && terms.length === 0 && (
-          <p className="empty-state card">
+          <p className="empty-state">
             No terms yet — they&apos;ll appear here as the briefing explains them.
           </p>
         )}

@@ -1,5 +1,6 @@
-import { Inter, Manrope } from "next/font/google";
+import { Inter, Lora } from "next/font/google";
 import "./globals.css";
+import SiteHeader from "./components/SiteHeader";
 import SiteFooter from "./components/SiteFooter";
 
 const inter = Inter({
@@ -8,10 +9,10 @@ const inter = Inter({
   display: "swap",
 });
 
-const manrope = Manrope({
+const lora = Lora({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  variable: "--font-manrope",
+  weight: ["500", "600", "700"],
+  variable: "--font-lora",
   display: "swap",
 });
 
@@ -28,8 +29,9 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable} ${manrope.variable}`}>
+    <html lang="en" className={`${inter.variable} ${lora.variable}`}>
       <body>
+        <SiteHeader />
         {children}
         <SiteFooter />
       </body>

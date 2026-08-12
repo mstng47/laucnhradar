@@ -4,6 +4,7 @@
 import { readFile, writeFile } from "fs/promises";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
+import { estimateArticleReadingMinutes } from "./article-reading-time.mjs";
 import "dotenv/config";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -180,6 +181,7 @@ async function saveToSupabase(output) {
     new_terms: entry.new_terms ?? null,
     url: entry.url,
     source: entry.source,
+    article_read_minutes: entry.article_read_minutes ?? null,
   }));
 
   const { data, error } = await supabase
@@ -224,10 +226,22 @@ async function main() {
   }
 
   const digest = await summarize(raw.items, knownTerms);
+
+  // Best-effort and fully parallel — one slow or blocked article can't hold
+  // up the others, and a failure here never fails the run (see
+  // article-reading-time.mjs).
+  console.log(`Estimating reading time for ${digest.length} linked article(s)...`);
+  const digestWithReadingTime = await Promise.all(
+    digest.map(async (entry) => ({
+      ...entry,
+      article_read_minutes: await estimateArticleReadingMinutes(entry.url),
+    }))
+  );
+
   const output = {
     date: new Date().toISOString().slice(0, 10),
     generatedAt: new Date().toISOString(),
-    entries: digest,
+    entries: digestWithReadingTime,
   };
 
   await writeFile("output/latest.json", JSON.stringify(output, null, 2));

@@ -1,7 +1,7 @@
 import { getSupabaseClient } from "../supabase";
 
 const ENTRY_COLUMNS =
-  "id, headline, what_happened, why_it_matters, new_terms, url, source, digest_date";
+  "id, headline, what_happened, why_it_matters, new_terms, url, source, digest_date, article_read_minutes";
 
 // Entries within a day are numbered in the order the pipeline wrote them.
 async function getEntriesForDate(date) {

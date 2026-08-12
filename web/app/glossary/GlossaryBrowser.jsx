@@ -36,16 +36,14 @@ export default function GlossaryBrowser({ terms }) {
         aria-label="Search glossary terms"
       />
 
-      {groups.length === 0 && (
-        <p className="empty-state card">No terms match &quot;{query}&quot;.</p>
-      )}
+      {groups.length === 0 && <p className="empty-state">No terms match &quot;{query}&quot;.</p>}
 
       {groups.map(([letter, items]) => (
         <section className="glossary-group" key={letter}>
           <h2 className="glossary-group-letter">{letter}</h2>
           <ul className="glossary-terms">
             {items.map((t) => (
-              <li key={t.id} className="card">
+              <li key={t.id}>
                 <span className="glossary-term">{t.term}</span>
                 <p className="glossary-definition">{t.definition}</p>
               </li>

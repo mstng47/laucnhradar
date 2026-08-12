@@ -2,9 +2,9 @@ export default function BriefingList({ entries }) {
   return (
     <ol className="briefing-list">
       {entries.map((entry, index) => (
-        <li className="card briefing-item" key={entry.id}>
+        <li className="briefing-item" key={entry.id}>
           <div className="item-head">
-            <span className="item-number" aria-hidden="true">
+            <span className="item-index" aria-hidden="true">
               {String(index + 1).padStart(2, "0")}
             </span>
             <a
@@ -19,7 +19,7 @@ export default function BriefingList({ entries }) {
 
           <p className="item-body">{entry.what_happened}</p>
 
-          <div className="why-box">
+          <div className="why-marker">
             <span className="why-label">Why it matters</span>
             <p>{entry.why_it_matters}</p>
           </div>
@@ -28,17 +28,21 @@ export default function BriefingList({ entries }) {
             {entry.new_terms?.length > 0 && (
               <div className="chips">
                 {entry.new_terms.map((term) => (
-                  <span
-                    key={term.term}
-                    className="chip chip-mint"
-                    title={term.definition}
-                  >
+                  <span key={term.term} className="chip" title={term.definition}>
                     {term.term}
                   </span>
                 ))}
               </div>
             )}
-            <span className="chip chip-violet source-tag">{entry.source}</span>
+            <div className="item-attribution">
+              <span className="source-tag">{entry.source}</span>
+              {Number.isFinite(entry.article_read_minutes) && (
+                <>
+                  <span className="meta-dot">·</span>
+                  <span className="read-time">{entry.article_read_minutes} min read</span>
+                </>
+              )}
+            </div>
           </div>
         </li>
       ))}
