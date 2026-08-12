@@ -1,172 +1,454 @@
 /* Mobile first: this is read on a phone each morning, so the small-screen
-   layout is the default and desktop only widens it. */
+   layout is the default and desktop only widens it.
+
+   Palette lives entirely in the :root block below — change a value there
+   and it updates everywhere it's used. Each accent colour has one fixed
+   meaning: amber = headlines & links, mint = glossary terms, violet =
+   source tags. Don't reuse an accent for anything else. */
 
 :root {
-  color-scheme: light dark;
-  --text: #1a1a1a;
-  --text-soft: #4a4a4a;
-  --text-faint: #6b6b6b;
-  --rule: #e2e2e2;
-  --accent: #0b57d0;
-  --error: #b00020;
-}
+  color-scheme: dark;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #ededed;
-    --text-soft: #c4c4c4;
-    --text-faint: #9a9a9a;
-    --rule: #333;
-    --accent: #8ab4f8;
-  }
+  /* Surfaces: deep near-black with a blue undertone, cards a step lighter
+     than the page so content sits on distinct panels. */
+  --bg: #0a0e17;
+  --surface: #121a29;
+  --surface-2: #182236;
+  --border: #232d43;
+
+  /* Text */
+  --text: #edf1f8;
+  --text-soft: #a9b3c9;
+  --text-faint: #6c7690;
+
+  /* Accents — pick exact shades here, used as both solid colour and,
+     via the *-rgb triplets, translucent tints for chips/callouts. */
+  --amber: #f2a94f;
+  --amber-rgb: 242, 169, 79;
+  --mint: #5fd9c4;
+  --mint-rgb: 95, 217, 196;
+  --violet: #b9a4f5;
+  --violet-rgb: 185, 164, 245;
+  --error: #f87171;
+  --error-rgb: 248, 113, 113;
+
+  --font-body: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: var(--font-manrope), var(--font-body);
 }
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  background: var(--bg);
+}
+
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
   /* 17px keeps body text comfortable on a phone without zooming. */
   font-size: 17px;
   line-height: 1.6;
   color: var(--text);
+  background: var(--bg);
   -webkit-text-size-adjust: 100%;
 }
 
-main {
-  max-width: 38rem;
+a {
+  color: inherit;
+}
+
+.container {
+  max-width: 40rem;
   margin: 0 auto;
-  padding: 1.5rem 1.15rem 4rem;
+  padding: 0 1.15rem;
 }
 
-h1 {
-  font-size: 1.6rem;
-  line-height: 1.2;
-  margin: 0 0 0.2rem;
+main {
+  padding: 1.75rem 0 3rem;
 }
 
-.subtitle {
-  color: var(--text-faint);
-  margin: 0 0 0.75rem;
-  font-size: 0.95rem;
+/* ---------- Header ---------- */
+
+.site-header {
+  padding: 1.5rem 0 1.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.75rem;
 }
 
-.backlink {
-  margin: 0 0 1.75rem;
-  font-size: 0.95rem;
-}
-
-.backlink a {
-  color: var(--accent);
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: -0.01em;
+  color: var(--text);
   text-decoration: none;
-  /* Generous tap target for thumbs. */
+}
+
+.brand-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--amber);
+  flex-shrink: 0;
+}
+
+.eyebrow {
+  color: var(--text-faint);
+  margin: 0.35rem 0 0;
+  font-size: 0.95rem;
+}
+
+.meta-bar {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  color: var(--text-faint);
+}
+
+.meta-bar strong {
+  color: var(--text-soft);
+  font-weight: 600;
+}
+
+.meta-dot {
+  opacity: 0.6;
+}
+
+.back-row {
+  margin: -0.4rem 0 1.25rem;
+}
+
+.back-link {
   display: inline-block;
+  color: var(--amber);
+  text-decoration: none;
+  font-size: 0.92rem;
   padding: 0.4rem 0;
 }
 
-.backlink a:hover {
+.back-link:hover {
   text-decoration: underline;
+}
+
+/* ---------- Cards & states ---------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
 }
 
 .error {
   color: var(--error);
+  padding: 1rem 1.15rem;
 }
 
-/* Date heading */
-h2 {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-faint);
-  margin: 2.25rem 0 0.5rem;
+.empty-state {
+  padding: 1.5rem 1.15rem;
+  color: var(--text-soft);
 }
 
-ul {
+/* ---------- Briefing list ---------- */
+
+.briefing-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
 }
 
-li {
-  padding: 1.15rem 0;
-  border-top: 1px solid var(--rule);
+.briefing-item {
+  padding: 1.15rem 1.15rem 1.25rem;
 }
 
-li > a {
-  display: block;
-  font-weight: 650;
+.item-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.item-number {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: rgba(var(--amber-rgb), 0.14);
+  color: var(--amber);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.8rem;
+  margin-top: 0.05rem;
+}
+
+.item-headline {
+  font-family: var(--font-display);
+  font-weight: 700;
   font-size: 1.08rem;
   line-height: 1.35;
-  color: var(--text);
+  color: var(--amber);
   text-decoration: none;
-  /* Long URLs and headlines must never push the page sideways. */
   overflow-wrap: anywhere;
 }
 
-li > a:hover {
+.item-headline:hover {
   text-decoration: underline;
 }
 
-li p {
-  margin: 0.5rem 0 0;
+.item-body {
+  margin: 0.7rem 0 0;
   color: var(--text-soft);
+  line-height: 1.7;
+  font-size: 0.97rem;
 }
 
-.why {
+.why-box {
+  margin: 0.9rem 0 0;
+  padding: 0.75rem 0.9rem;
+  background: rgba(var(--amber-rgb), 0.07);
+  border-left: 3px solid var(--amber);
+  border-radius: 0 10px 10px 0;
+}
+
+.why-label {
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--amber);
+  margin-bottom: 0.3rem;
+}
+
+.why-box p {
+  margin: 0;
   color: var(--text);
-  border-left: 3px solid var(--rule);
-  padding-left: 0.8rem;
+  font-weight: 500;
+  line-height: 1.6;
+  font-size: 0.98rem;
 }
 
-.terms {
-  margin: 0.75rem 0 0;
+.item-footer {
+  margin-top: 0.95rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+.chip-mint {
+  background: rgba(var(--mint-rgb), 0.13);
+  color: var(--mint);
+  border-color: rgba(var(--mint-rgb), 0.32);
+}
+
+.chip-violet {
+  background: rgba(var(--violet-rgb), 0.13);
+  color: var(--violet);
+  border-color: rgba(var(--violet-rgb), 0.32);
+}
+
+.source-tag {
+  margin-left: auto;
+}
+
+/* ---------- Archive ---------- */
+
+.archive-list {
+  list-style: none;
+  margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
-.terms li {
-  padding: 0.3rem 0;
-  border-top: none;
-  font-size: 0.92rem;
-  color: var(--text-soft);
+.archive-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.95rem 1.1rem;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.meta {
-  display: inline-block;
-  margin-top: 0.7rem;
-  font-size: 0.78rem;
+.archive-row:hover {
+  background: var(--surface-2);
+  border-color: rgba(var(--amber-rgb), 0.35);
+}
+
+.archive-date {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--text);
+  font-size: 0.98rem;
+}
+
+.archive-count {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+/* ---------- Glossary ---------- */
+
+.glossary-search {
+  width: 100%;
+  margin: 0 0 1.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 0.97rem;
+  font-family: var(--font-body);
+  transition: border-color 0.15s ease;
+}
+
+.glossary-search::placeholder {
   color: var(--text-faint);
 }
 
-/* Glossary page */
-.glossary {
+.glossary-search:focus {
+  outline: none;
+  border-color: rgba(var(--mint-rgb), 0.55);
+}
+
+.glossary-group {
+  margin-bottom: 1.5rem;
+}
+
+.glossary-group-letter {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--mint);
+  margin: 0 0 0.6rem;
+}
+
+.glossary-terms {
+  list-style: none;
   margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
 }
 
-.glossary > div {
-  padding: 0.9rem 0;
-  border-top: 1px solid var(--rule);
+.glossary-terms > li {
+  padding: 0.85rem 1rem;
 }
 
-.glossary dt {
-  font-weight: 650;
-  overflow-wrap: anywhere;
+.glossary-term {
+  display: inline-flex;
+  border-radius: 999px;
+  padding: 0.18rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: rgba(var(--mint-rgb), 0.13);
+  color: var(--mint);
+  border: 1px solid rgba(var(--mint-rgb), 0.32);
+  margin-bottom: 0.4rem;
 }
 
-.glossary dd {
-  margin: 0.25rem 0 0;
+.glossary-definition {
+  margin: 0;
   color: var(--text-soft);
+  line-height: 1.6;
+  font-size: 0.94rem;
 }
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 2.5rem;
+  padding: 1.75rem 0 2.5rem;
+}
+
+.footer-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-about {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 1rem;
+}
+
+.footer-nav a {
+  color: var(--amber);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.footer-nav a:hover {
+  text-decoration: underline;
+}
+
+.footer-note {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 0.8rem;
+}
+
+/* ---------- Desktop ---------- */
 
 @media (min-width: 40rem) {
   body {
     font-size: 18px;
   }
-  main {
-    padding: 2.5rem 1.5rem 5rem;
+  .container {
+    padding: 0 1.5rem;
   }
-  h1 {
-    font-size: 2rem;
+  main {
+    padding: 2.25rem 0 4rem;
+  }
+  .brand {
+    font-size: 1.6rem;
+  }
+  .item-headline {
+    font-size: 1.2rem;
   }
 }
