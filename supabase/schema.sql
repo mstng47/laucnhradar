@@ -40,3 +40,29 @@ create policy "Public read access"
   for select
   to anon, authenticated
   using (true);
+
+
+-- Glossary: every term the briefing has already explained to the reader.
+-- The pipeline loads these before each run so it stops re-explaining things
+-- already learned, and saves any newly defined terms afterwards.
+create table if not exists glossary_terms (
+  id bigint generated always as identity primary key,
+  -- Lowercased form, used only to stop the same term being saved twice
+  -- ("OWASP" and "owasp" are the same term to a reader).
+  term_key text not null unique,
+  term text not null,
+  definition text not null,
+  first_seen_date date not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists glossary_terms_term_idx on glossary_terms (term);
+
+alter table glossary_terms enable row level security;
+
+drop policy if exists "Public read access" on glossary_terms;
+create policy "Public read access"
+  on glossary_terms
+  for select
+  to anon, authenticated
+  using (true);

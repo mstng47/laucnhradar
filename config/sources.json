@@ -1,0 +1,71 @@
+{
+  "_comment": "Where the briefing looks for news. Edit this file to add or remove sources — no code changes needed. Every feed URL here was checked and returned recent, valid items. If you add one, run: npm run check-sources",
+
+  "_aiKeywordsNote": "Used to filter sources where filterForAI is true. A story is kept if its title or description mentions any of these.",
+  "aiKeywords": [
+    "ai", "a.i.", "artificial intelligence", "machine learning", "llm",
+    "large language model", "chatgpt", "openai", "anthropic", "claude",
+    "gemini", "copilot", "neural", "generative", "genai", "agentic",
+    "ai agent", "deepmind", "mistral", "llama", "transformer model"
+  ],
+
+  "hackernews": {
+    "enabled": true,
+    "_comment": "Searched via the public Hacker News (Algolia) API. Results are filtered to AI-related items only.",
+    "searchTerms": ["AI", "LLM", "artificial intelligence", "OpenAI", "Anthropic"],
+    "filterForAI": true,
+    "minPoints": 20,
+    "_minPointsComment": "Ignore Hacker News posts below this score, to cut low-quality noise."
+  },
+
+  "feeds": [
+    {
+      "name": "TechCrunch AI",
+      "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+      "filterForAI": false,
+      "_comment": "Business and funding news about AI companies."
+    },
+    {
+      "name": "The Verge AI",
+      "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+      "filterForAI": false,
+      "_comment": "Mainstream, plain-English AI coverage."
+    },
+    {
+      "name": "Ars Technica AI",
+      "url": "https://arstechnica.com/ai/feed/",
+      "filterForAI": false,
+      "_comment": "Careful, sceptical AI reporting."
+    },
+    {
+      "name": "MIT Technology Review AI",
+      "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
+      "filterForAI": false,
+      "_comment": "How AI is affecting industries and society."
+    },
+    {
+      "name": "Wired AI",
+      "url": "https://www.wired.com/feed/tag/ai/latest/rss",
+      "filterForAI": false,
+      "_comment": "Accessible AI features and news."
+    },
+    {
+      "name": "OpenAI Blog",
+      "url": "https://openai.com/blog/rss.xml",
+      "filterForAI": false,
+      "_comment": "Announcements straight from OpenAI."
+    },
+    {
+      "name": "BBC Technology",
+      "url": "https://feeds.bbci.co.uk/news/technology/rss.xml",
+      "filterForAI": true,
+      "_comment": "General tech news, so it is filtered down to AI stories only."
+    },
+    {
+      "name": "Product Hunt",
+      "url": "https://www.producthunt.com/feed",
+      "filterForAI": true,
+      "_comment": "Tracks new product launches. Filtered down to AI launches only."
+    }
+  ]
+}

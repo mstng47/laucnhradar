@@ -1,21 +1,12 @@
-import { createClient } from "@supabase/supabase-js";
+import Link from "next/link";
+import { getSupabaseClient } from "./supabase";
 
 // Data changes daily via the pipeline's cron — always fetch fresh rather
 // than serving a build-time snapshot.
 export const dynamic = "force-dynamic";
 
 async function getEntries() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-  if (!url || !key) {
-    throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY " +
-        "— add them to web/.env.local (see web/.env.example)."
-    );
-  }
-
-  const supabase = createClient(url, key);
+  const supabase = getSupabaseClient();
 
   const { data, error } = await supabase
     .from("digest_entries")
@@ -51,6 +42,9 @@ export default async function Home() {
     <main>
       <h1>LaunchRadar</h1>
       <p className="subtitle">Your daily AI briefing</p>
+      <p className="backlink">
+        <Link href="/glossary">Glossary →</Link>
+      </p>
 
       {loadError && <p className="error">Couldn&apos;t load the digest: {loadError}</p>}
 

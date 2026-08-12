@@ -2,7 +2,13 @@ import "./globals.css";
 
 export const metadata = {
   title: "LaunchRadar",
-  description: "Daily digest of new AI tool launches",
+  description: "Your daily AI briefing",
+};
+
+// Read on a phone, so scale to the device width and allow zooming.
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({ children }) {
