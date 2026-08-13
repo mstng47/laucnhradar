@@ -65,7 +65,8 @@
       "name": "Product Hunt",
       "url": "https://www.producthunt.com/feed",
       "filterForAI": true,
-      "_comment": "Tracks new product launches. Filtered down to AI launches only."
+      "lookbackHours": 48,
+      "_comment": "Tracks new product launches. Filtered down to AI launches only. Wider lookback than other sources (48h, not 24h) because the AI-relevant slice of any single day's launches is small — this gives the briefing enough genuine candidates to pick from for the 'New launches' section."
     }
   ]
 }

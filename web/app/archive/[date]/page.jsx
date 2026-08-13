@@ -1,6 +1,6 @@
 import Link from "next/link";
 import PageIntro from "../../components/PageIntro";
-import BriefingList from "../../components/BriefingList";
+import Briefing from "../../components/Briefing";
 import { getEntriesForDate } from "../../lib/data";
 import { formatDate, estimateReadingMinutes } from "../../lib/format";
 
@@ -49,7 +49,7 @@ export default async function ArchiveDate({ params }) {
           <p className="empty-state">No briefing was saved for this date.</p>
         )}
 
-        {!loadError && entries.length > 0 && <BriefingList entries={entries} />}
+        {!loadError && entries.length > 0 && <Briefing entries={entries} />}
       </main>
     </>
   );
