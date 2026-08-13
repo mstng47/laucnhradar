@@ -34,8 +34,11 @@
   --error: #f2867d;
   --error-rgb: 242, 134, 125;
 
-  --content-width: 47.5rem; /* ~760px reading column */
+  --content-width: 47.5rem; /* ~760px reading column — masthead, footer, simple pages */
   --content-half: calc(var(--content-width) / 2);
+  --layout-width: 68rem; /* ~1088px — the two-column briefing area on laptop+ */
+  --layout-half: calc(var(--layout-width) / 2);
+  --sidebar-width: 20rem; /* ~320px */
 
   --font-body: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-lora), Georgia, "Times New Roman", serif;
@@ -61,16 +64,22 @@ body {
 }
 
 /* Fine grain across the whole page — a single small SVG tile, repeated,
-   so it's one cheap paint rather than a downloaded image file. Kept at a
-   very low opacity so it reads as texture, not a visible pattern. */
+   so it's one cheap paint rather than a downloaded image file.
+   base64-encoded (not percent-encoded) to sidestep any bundler mangling
+   of a data URI containing its own nested url(#n) filter reference.
+   Earlier attempt used raw turbulence output (roughly 116-228 out of
+   255 — no true blacks/whites), which at low opacity blended into the
+   dark background as an ~5-unit shift: technically rendering, but
+   invisible in practice. A feComponentTransfer contrast boost here
+   spreads that to the full 0-255 range so it's actually visible. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.045;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.09;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNDAnIGhlaWdodD0nMTQwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPScyJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PGZlQ29sb3JNYXRyaXggdHlwZT0nc2F0dXJhdGUnIHZhbHVlcz0nMCcvPjxmZUNvbXBvbmVudFRyYW5zZmVyPjxmZUZ1bmNSIHR5cGU9J2xpbmVhcicgc2xvcGU9JzQnIGludGVyY2VwdD0nLTEuNicvPjxmZUZ1bmNHIHR5cGU9J2xpbmVhcicgc2xvcGU9JzQnIGludGVyY2VwdD0nLTEuNicvPjxmZUZ1bmNCIHR5cGU9J2xpbmVhcicgc2xvcGU9JzQnIGludGVyY2VwdD0nLTEuNicvPjwvZmVDb21wb25lbnRUcmFuc2Zlcj48L2ZpbHRlcj48cmVjdCB3aWR0aD0nMTQwJyBoZWlnaHQ9JzE0MCcgZmlsdGVyPSd1cmwoI24pJy8+PC9zdmc+");
   background-repeat: repeat;
 }
 
@@ -91,26 +100,26 @@ body::after {
   -webkit-mask-image: linear-gradient(
     to right,
     black 0,
-    black calc(50% - var(--content-half) - 2rem),
-    transparent calc(50% - var(--content-half)),
-    transparent calc(50% + var(--content-half)),
-    black calc(50% + var(--content-half) + 2rem),
+    black calc(50% - var(--layout-half) - 2rem),
+    transparent calc(50% - var(--layout-half)),
+    transparent calc(50% + var(--layout-half)),
+    black calc(50% + var(--layout-half) + 2rem),
     black 100%
   );
   mask-image: linear-gradient(
     to right,
     black 0,
-    black calc(50% - var(--content-half) - 2rem),
-    transparent calc(50% - var(--content-half)),
-    transparent calc(50% + var(--content-half)),
-    black calc(50% + var(--content-half) + 2rem),
+    black calc(50% - var(--layout-half) - 2rem),
+    transparent calc(50% - var(--layout-half)),
+    transparent calc(50% + var(--layout-half)),
+    black calc(50% + var(--layout-half) + 2rem),
     black 100%
   );
 }
 
 /* Only enable the dot grid once there's real margin either side of the
    column to put it in. */
-@media (min-width: 64rem) {
+@media (min-width: 76rem) {
   body::after {
     display: block;
   }
@@ -126,6 +135,18 @@ a {
    whenever this rule happened to be the last one the cascade saw. */
 .container {
   max-width: var(--content-width);
+  margin: 0 auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Wider than .container — used only for <main> on pages that render the
+   two-column briefing (home, an archive date). The masthead and footer
+   stay at the narrower .container width above/below it; both are centred
+   on the same axis, so it reads as a deliberate wide body under a calmer
+   narrow header, not a mismatch. */
+.container-wide {
+  max-width: var(--layout-width);
   margin: 0 auto;
   padding-left: 1rem;
   padding-right: 1rem;
@@ -157,6 +178,9 @@ main {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   font-family: var(--font-body);
   font-weight: 800;
   font-size: 1rem;
@@ -164,6 +188,10 @@ main {
   color: var(--text);
   text-decoration: none;
   white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.brand svg {
   flex-shrink: 0;
 }
 
@@ -273,11 +301,14 @@ main {
   margin: 2.75rem 0 0.75rem;
 }
 
-/* Whichever section renders first (usually "What matters today", but a
-   thin day could start with "New launches" instead) shouldn't have a big
-   gap above it — main already provides top padding. */
-main > section:first-child > .section-heading,
-main > section:first-child > .section-heading-light {
+/* Whichever section renders first in the main column or the sidebar
+   shouldn't have a big gap above it — the wrapping element already
+   provides the right offset (main's own top padding, or
+   .briefing-sidebar's margin/padding-top below). */
+.briefing-main > section:first-child > .section-heading,
+.briefing-main > section:first-child > .section-heading-light,
+.briefing-sidebar > section:first-child > .section-heading,
+.briefing-sidebar > section:first-child > .section-heading-light {
   margin-top: 0;
 }
 
@@ -322,6 +353,62 @@ main > section:first-child > .section-heading-light {
   font-size: 0.7rem;
   font-weight: 700;
   white-space: nowrap;
+}
+
+/* ---------- Two-column layout (laptop+) ---------- */
+
+/* Mobile-first: single column by default. .briefing-main and
+   .briefing-sidebar are plain block elements until the grid kicks in
+   below, so the sidebar just stacks after the main list on any narrower
+   screen — no separate mobile-specific rules needed. */
+.briefing-sidebar {
+  margin-top: 3rem;
+}
+
+@media (min-width: 56.25rem) {
+  /* 900px */
+  .briefing-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--sidebar-width);
+    align-items: start;
+    gap: 1rem 3.5rem;
+  }
+
+  .briefing-sidebar {
+    margin-top: 0;
+    /* Sits level with the main column's first item, not the "What
+       matters today" heading above it. */
+    padding-top: 3.75rem;
+  }
+}
+
+/* Sidebar reads lighter/more compact than the main column throughout —
+   smaller type, tighter spacing than .briefing-item uses. */
+.sidebar-terms {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-terms li {
+  padding: 0.65rem 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.sidebar-terms li:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.sidebar-terms .chip {
+  margin-bottom: 0.4rem;
+}
+
+.sidebar-term-def {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  line-height: 1.55;
 }
 
 /* ---------- Briefing list ---------- */
@@ -497,73 +584,6 @@ main > section:first-child > .section-heading-light {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- Glossary ---------- */
-
-.glossary-search {
-  width: 100%;
-  margin: 0.5rem 0 2rem;
-  padding: 0.75rem 1rem;
-  background: var(--surface);
-  border: 1px solid var(--hairline);
-  border-radius: 10px;
-  color: var(--text);
-  font-size: 0.97rem;
-  font-family: var(--font-body);
-  transition: border-color 0.15s ease;
-}
-
-.glossary-search::placeholder {
-  color: var(--text-faint);
-}
-
-.glossary-search:focus {
-  outline: none;
-  border-color: rgba(var(--teal-rgb), 0.55);
-}
-
-.glossary-group {
-  margin-bottom: 0.5rem;
-}
-
-.glossary-group-letter {
-  font-family: var(--font-body);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.09em;
-  color: var(--teal);
-  margin: 1.75rem 0 0.25rem;
-}
-
-.glossary-terms {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.glossary-terms > li {
-  padding: 1.1rem 0;
-  border-top: 1px solid var(--hairline);
-}
-
-.glossary-term {
-  display: inline-flex;
-  border-radius: 999px;
-  padding: 0.18rem 0.6rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  background: rgba(var(--violet-rgb), 0.13);
-  color: var(--violet);
-  border: 1px solid rgba(var(--violet-rgb), 0.32);
-  margin-bottom: 0.5rem;
-}
-
-.glossary-definition {
-  margin: 0;
-  color: var(--text-soft);
-  line-height: 1.65;
-  font-size: 0.96rem;
-}
-
 /* ---------- Footer ---------- */
 
 .site-footer {
@@ -612,7 +632,8 @@ main > section:first-child > .section-heading-light {
   body {
     font-size: 18px;
   }
-  .container {
+  .container,
+  .container-wide {
     padding-left: 2rem;
     padding-right: 2rem;
   }
@@ -624,6 +645,10 @@ main > section:first-child > .section-heading-light {
   }
   .brand {
     font-size: 1.2rem;
+  }
+  .brand svg {
+    width: 26px;
+    height: 26px;
   }
   .main-nav {
     gap: 1.4rem;

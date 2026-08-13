@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Logo from "./Logo";
 
 const NAV = [
   { href: "/", label: "Briefing" },
   { href: "/archive", label: "Archive" },
-  { href: "/glossary", label: "Glossary" },
 ];
 
 export default function SiteHeader() {
@@ -16,7 +16,8 @@ export default function SiteHeader() {
     <header className="site-header">
       <div className="container header-bar">
         <Link href="/" className="brand">
-          LaunchRadar
+          <Logo />
+          Sift
         </Link>
         <nav className="main-nav">
           {NAV.map(({ href, label }) => {

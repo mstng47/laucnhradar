@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { date } = await params;
-  return { title: `${date} — LaunchRadar` };
+  return { title: `${date} — Sift` };
 }
 
 export default async function ArchiveDate({ params }) {
@@ -36,7 +36,7 @@ export default async function ArchiveDate({ params }) {
   return (
     <>
       <PageIntro eyebrow={formatDate(date, { weekday: "long" })} meta={meta} />
-      <main className="container">
+      <main className="container-wide">
         <p className="back-row">
           <Link href="/archive" className="back-link">
             ← All briefings

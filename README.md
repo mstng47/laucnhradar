@@ -1,4 +1,4 @@
-# LaunchRadar
+# Sift
 
 An automated daily AI briefing written for one specific reader. Pulls items from
 AI news feeds, Product Hunt and Hacker News, then Claude selects only the few
@@ -45,7 +45,8 @@ check-sources.mjs        → checks every feed in sources.json still works (`npm
 
 Terms the briefing explains are saved to the `glossary_terms` table. Each run
 loads them first and tells Claude the reader already knows them, so the same
-jargon isn't explained twice. The website lists them all at `/glossary`.
+jargon isn't explained twice. There's no dedicated page for it — defined
+terms show up inline as chips within the briefing items that introduce them.
 
 ## Website
 

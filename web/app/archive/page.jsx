@@ -6,7 +6,7 @@ import { formatDate } from "../lib/format";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Archive — LaunchRadar",
+  title: "Archive — Sift",
   description: "Every past briefing, by date",
 };
 
