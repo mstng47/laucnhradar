@@ -12,6 +12,12 @@ const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const READER_PROFILE_PATH = new URL("./reader-profile.md", import.meta.url);
 const RECENT_COVERAGE_DAYS = 14;
 
+// The prompt already asks for these limits, but asking is not enforcing —
+// on 2026-08-13 the model returned 12/10/6 against a 5/5/3 target (28
+// items, a claimed 6-minute read on a product meant for under two). These
+// caps are the actual backstop; see flattenSections.
+const SECTION_CAPS = { main: 5, launch: 5, also: 3 };
+
 async function loadReaderProfile() {
   const raw = await readFile(READER_PROFILE_PATH, "utf-8");
   // Everything above the "---" divider is a note for human editors, not
@@ -54,23 +60,28 @@ ${recentCoverage.map((e) => `- ${e.headline} — ${e.url}`).join("\n")}
 READER PROFILE:
 ${readerProfile}
 ${knownTermsSection}${recentCoverageSection}
-Organize your selections into three sections:
+Organize your selections into three sections. These are hard maximums, not
+targets — this briefing is read in under two minutes before work, and every
+extra item past the limit makes that fail:
 
-1. "main" — the 3 to 5 most important AI developments today, specifically
-   relevant to this reader. Full detail. Prefer things that change what they
-   should know or do over things that are merely interesting.
-2. "launches" — up to 5 newly launched AI tools or products, primarily
-   sourced from Product Hunt items in the list below (a genuine launch from
-   another source counts too). ONE LINE each — just the product name and
-   what it does. These are quick scans, not reads: no analysis, no "why it
-   matters", no defined terms.
-3. "also" — 2 to 3 other items worth a passing mention but that don't
-   justify full treatment. ONE LINE each — a headline and a single-sentence
-   summary.
+1. "main" — AT MOST 5 items, and normally 3-5. The most important AI
+   developments today, specifically relevant to this reader. Full detail.
+   Prefer things that change what they should know or do over things that
+   are merely interesting. NEVER return more than 5.
+2. "launches" — AT MOST 5 items. Newly launched AI tools or products,
+   primarily sourced from Product Hunt items in the list below (a genuine
+   launch from another source counts too). ONE LINE each — just the product
+   name and what it does. These are quick scans, not reads: no analysis, no
+   "why it matters", no defined terms. NEVER return more than 5.
+3. "also" — AT MOST 3 items, normally 2-3. Other items worth a passing
+   mention but that don't justify full treatment. ONE LINE each — a
+   headline and a single-sentence summary. NEVER return more than 3.
 
-Leave a section out entirely (empty array) if there isn't genuinely good
-material for it that day. Never pad to hit a target count — an honest short
-section (or no section) beats a padded one.
+If more than the maximum are genuinely worth including, cut to the
+strongest ones by this rule's own limit — do not exceed it under any
+circumstance. Leave a section out entirely (empty array) if there isn't
+genuinely good material for it that day. Never pad to hit a target count —
+an honest short section (or no section) beats a padded one.
 
 For "main" items, write:
 - headline: plain English, no jargon, max 10 words
@@ -183,7 +194,22 @@ async function saveNewTerms(output) {
 // glossary extraction, reading-time estimation) stays a single flat list
 // instead of needing three separate code paths.
 function flattenSections(raw) {
-  const main = (raw.main ?? []).map((e) => ({
+  // Cap here, not just in the prompt wording — a "3 to 5" or "up to N" in
+  // English is a request, not a constraint the model reliably honours.
+  // Slicing is applied to whatever order Claude returned (its own
+  // priority ordering), and logged so drift is visible in the run output
+  // rather than silently swallowed.
+  function capped(list, key, max) {
+    if (list.length <= max) return list;
+    console.warn(`"${key}" came back with ${list.length} items — keeping the first ${max}.`);
+    return list.slice(0, max);
+  }
+
+  const rawMain = capped(raw.main ?? [], "main", SECTION_CAPS.main);
+  const rawLaunches = capped(raw.launches ?? [], "launches", SECTION_CAPS.launch);
+  const rawAlso = capped(raw.also ?? [], "also", SECTION_CAPS.also);
+
+  const main = rawMain.map((e) => ({
     section: "main",
     headline: e.headline,
     url: e.url,
@@ -192,7 +218,7 @@ function flattenSections(raw) {
     why_it_matters: e.why_it_matters,
     new_terms: e.new_terms ?? [],
   }));
-  const launches = (raw.launches ?? []).map((e) => ({
+  const launches = rawLaunches.map((e) => ({
     section: "launch",
     headline: e.name,
     url: e.url,
@@ -201,7 +227,7 @@ function flattenSections(raw) {
     why_it_matters: null,
     new_terms: [],
   }));
-  const also = (raw.also ?? []).map((e) => ({
+  const also = rawAlso.map((e) => ({
     section: "also",
     headline: e.headline,
     url: e.url,

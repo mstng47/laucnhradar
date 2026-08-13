@@ -33,7 +33,7 @@ export default async function Home() {
   return (
     <>
       <PageIntro eyebrow="Your daily AI briefing" meta={meta} />
-      <main className="container-wide">
+      <main className="container">
         {loadError && <p className="error">Couldn&apos;t load the briefing: {loadError}</p>}
 
         {!loadError && entries.length === 0 && (

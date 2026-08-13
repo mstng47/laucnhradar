@@ -36,7 +36,7 @@ export default async function ArchiveDate({ params }) {
   return (
     <>
       <PageIntro eyebrow={formatDate(date, { weekday: "long" })} meta={meta} />
-      <main className="container-wide">
+      <main className="container">
         <p className="back-row">
           <Link href="/archive" className="back-link">
             ← All briefings
