@@ -1,19 +1,42 @@
 import { getSupabaseClient } from "../supabase";
 
 const ENTRY_COLUMNS =
+  "id, headline, what_happened, why_it_matters, new_terms, url, source, digest_date, article_read_minutes, section";
+
+// Same as ENTRY_COLUMNS minus `section`, for reading before the migration
+// in MANUAL_STEPS.md has been run.
+const ENTRY_COLUMNS_WITHOUT_SECTION =
   "id, headline, what_happened, why_it_matters, new_terms, url, source, digest_date, article_read_minutes";
+
+function isMissingSectionColumn(error) {
+  // 42703 is Postgres's "undefined_column" code; the message check is a
+  // fallback in case a Postgrest version ever omits it.
+  return error.code === "42703" || /\bsection\b.*does not exist/i.test(error.message ?? "");
+}
+
+// Runs the same query with and without the `section` column, so the site
+// keeps working (everything just reads as one "main" section) if the
+// migration in MANUAL_STEPS.md hasn't been run yet, rather than erroring.
+async function selectEntries(supabase, applyFilters) {
+  let { data, error } = await applyFilters(supabase.from("digest_entries").select(ENTRY_COLUMNS));
+
+  if (error && isMissingSectionColumn(error)) {
+    ({ data, error } = await applyFilters(
+      supabase.from("digest_entries").select(ENTRY_COLUMNS_WITHOUT_SECTION)
+    ));
+    if (!error) data = (data ?? []).map((row) => ({ ...row, section: "main" }));
+  }
+
+  if (error) throw new Error(`Supabase query failed: ${error.message}`);
+  return data ?? [];
+}
 
 // Entries within a day are numbered in the order the pipeline wrote them.
 async function getEntriesForDate(date) {
   const supabase = getSupabaseClient();
-  const { data, error } = await supabase
-    .from("digest_entries")
-    .select(ENTRY_COLUMNS)
-    .eq("digest_date", date)
-    .order("id", { ascending: true });
-
-  if (error) throw new Error(`Supabase query failed: ${error.message}`);
-  return data ?? [];
+  return selectEntries(supabase, (query) =>
+    query.eq("digest_date", date).order("id", { ascending: true })
+  );
 }
 
 async function getLatestBriefing() {

@@ -5,6 +5,38 @@ coding — it's copying, pasting and clicking.
 
 ---
 
+## Add the "sections" column
+
+The briefing is now split into three sections — **What matters today** (the
+full-detail items, as before), **New launches** (quick one-line product
+mentions), and **Also worth knowing** (quick one-line mentions of anything
+else). The database needs one column to record which section each item
+belongs to.
+
+**Run this before or right after merging — until you do, the website will
+show everything as one "What matters today" list** (it won't error; it just
+won't have the new sections yet, since it can't tell them apart).
+
+1. Go to **https://supabase.com** and open your project.
+2. In the left sidebar, click **SQL Editor**.
+3. Click **New query** (top of the page).
+4. Copy the lines below and paste them into the empty box.
+5. Click the green **Run** button (bottom right). It may also say **Run CTRL+Enter**.
+6. You should see **"Success. No rows returned"**. That means it worked.
+
+```sql
+alter table digest_entries add column if not exists section text not null default 'main';
+alter table digest_entries alter column why_it_matters drop not null;
+create index if not exists digest_entries_section_idx on digest_entries (digest_date, section);
+```
+
+> Safe to run as many times as you like. Nothing existing is touched or
+> deleted — every row you already have gets labelled "main", which is the
+> correct read for them: they were written before sections existed, in the
+> old full-detail format.
+
+---
+
 ## Why reading times might not show up right away
 
 Each item can show how long the *original linked article* takes to read,
@@ -13,7 +45,7 @@ briefings generated *after* this feature shipped — older rows in the database
 were written before it existed, so they don't have one and never will.
 
 If today's briefing shows no reading times, it just means the automatic
-morning run (07:00 UTC) hasn't happened again yet since this was added.
+morning run (03:00 UTC) hasn't happened again yet since this was added.
 Nothing to fix — tomorrow's briefing will have them. If you want them sooner:
 
 1. Go to **https://github.com/mstng47/laucnhradar/actions**

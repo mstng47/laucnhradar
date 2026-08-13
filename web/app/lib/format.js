@@ -15,10 +15,24 @@ function formatDate(dateStr, { weekday = "short" } = {}) {
 
 function estimateReadingMinutes(entries) {
   const words = entries.reduce((sum, entry) => {
-    const text = `${entry.headline} ${entry.what_happened} ${entry.why_it_matters}`;
+    // why_it_matters is null for "launch"/"also" entries — the ?? keeps
+    // that from literally stringifying to the word "null".
+    const text = `${entry.headline} ${entry.what_happened} ${entry.why_it_matters ?? ""}`;
     return sum + text.trim().split(/\s+/).filter(Boolean).length;
   }, 0);
   return Math.max(1, Math.round(words / 200));
 }
 
-export { formatDate, estimateReadingMinutes };
+// Splits a day's flat entry list into the three briefing sections. Older
+// rows (or a fresh read before the section column exists — see
+// lib/data.js) come back tagged "main", which is the right bucket for them:
+// they were written in the old full-detail-only format.
+function groupSections(entries) {
+  return {
+    main: entries.filter((e) => e.section === "main"),
+    launches: entries.filter((e) => e.section === "launch"),
+    also: entries.filter((e) => e.section === "also"),
+  };
+}
+
+export { formatDate, estimateReadingMinutes, groupSections };

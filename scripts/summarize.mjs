@@ -10,6 +10,7 @@ import "dotenv/config";
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const READER_PROFILE_PATH = new URL("./reader-profile.md", import.meta.url);
+const RECENT_COVERAGE_DAYS = 14;
 
 async function loadReaderProfile() {
   const raw = await readFile(READER_PROFILE_PATH, "utf-8");
@@ -19,7 +20,7 @@ async function loadReaderProfile() {
   return (afterDivider ?? raw).trim();
 }
 
-function buildSystemPrompt(readerProfile, knownTerms) {
+function buildSystemPrompt(readerProfile, knownTerms, recentCoverage) {
   const knownTermsSection =
     knownTerms.length > 0
       ? `
@@ -32,31 +33,68 @@ terms that are genuinely new to them.
 `
       : "";
 
+  const recentCoverageSection =
+    recentCoverage.length > 0
+      ? `
+ALREADY COVERED (last ${RECENT_COVERAGE_DAYS} days) — do not repeat these:
+${recentCoverage.map((e) => `- ${e.headline} — ${e.url}`).join("\n")}
+
+- Exclude any candidate whose URL exactly matches one above.
+- Also exclude any candidate that's substantially the same story as one
+  above, even from a different outlet with a different URL — judge by
+  whether a reader who saw the earlier item would find this one redundant.
+- Exception: if a story has genuinely developed since it was covered, it
+  may appear again ONLY if the development itself is the news. Cover just
+  what's new — don't rehash the original angle.
+`
+      : "";
+
   return `You are writing a daily AI briefing for one specific reader.
 
 READER PROFILE:
 ${readerProfile}
-${knownTermsSection}
-From the items below, select ONLY the 3-5 most relevant to this reader.
-Ignore everything else — do not try to cover it all. Prefer things that
-change what they should know or do over things that are merely interesting.
+${knownTermsSection}${recentCoverageSection}
+Organize your selections into three sections:
 
-For each item you select, write:
-1. headline: plain English, no jargon, max 10 words
-2. what_happened: one sentence, as if explaining to a smart friend who doesn't work in tech
-3. why_it_matters: one sentence, specific to this reader's field and role — not generic importance
-4. new_terms: any term this reader likely wouldn't know, with a one-line plain
-   definition. Omit this key (or use an empty array) if there are none.
+1. "main" — the 3 to 5 most important AI developments today, specifically
+   relevant to this reader. Full detail. Prefer things that change what they
+   should know or do over things that are merely interesting.
+2. "launches" — up to 5 newly launched AI tools or products, primarily
+   sourced from Product Hunt items in the list below (a genuine launch from
+   another source counts too). ONE LINE each — just the product name and
+   what it does. These are quick scans, not reads: no analysis, no "why it
+   matters", no defined terms.
+3. "also" — 2 to 3 other items worth a passing mention but that don't
+   justify full treatment. ONE LINE each — a headline and a single-sentence
+   summary.
+
+Leave a section out entirely (empty array) if there isn't genuinely good
+material for it that day. Never pad to hit a target count — an honest short
+section (or no section) beats a padded one.
+
+For "main" items, write:
+- headline: plain English, no jargon, max 10 words
+- what_happened: one sentence, as if explaining to a smart friend who doesn't work in tech
+- why_it_matters: one sentence, specific to this reader's field and role — not generic importance
+- new_terms: any term this reader likely wouldn't know, with a one-line plain
+  definition. Omit this key (or use an empty array) if there are none.
+
+For "launches" items, write:
+- name: the product's name
+- what_it_does: ONE plain-English sentence — what it does, not why it matters
+
+For "also" items, write:
+- headline: plain English, max 10 words
+- summary: ONE plain-English sentence
 
 Rules:
-- Never use jargon without defining it in new_terms
+- Never use jargon without defining it in new_terms (main section only)
 - No hype language ("game-changing", "revolutionary", "massive")
-- If fewer than 3 items are genuinely worth this reader's time, return fewer.
-  An honest short briefing beats a padded one. Zero items is fine on a slow day.
-- Total output must be readable in under 90 seconds
+- The whole briefing, all three sections combined, must be readable in about
+  two minutes
 
-Respond with ONLY a JSON array, no other text, in this exact shape:
-[{"headline": "...", "url": "...", "source": "...", "what_happened": "...", "why_it_matters": "...", "new_terms": [{"term": "...", "definition": "..."}]}]`;
+Respond with ONLY a JSON object, no other text, in this exact shape:
+{"main": [{"headline": "...", "url": "...", "source": "...", "what_happened": "...", "why_it_matters": "...", "new_terms": [{"term": "...", "definition": "..."}]}], "launches": [{"name": "...", "url": "...", "source": "...", "what_it_does": "..."}], "also": [{"headline": "...", "url": "...", "source": "...", "summary": "..."}]}`;
 }
 
 // Returns null when Supabase isn't configured, so local runs still work.
@@ -77,6 +115,30 @@ async function loadKnownTerms() {
     return [];
   }
   return (data ?? []).map((row) => row.term);
+}
+
+// The database only stops the exact same URL being saved twice on the same
+// day — it says nothing about repeats across days. This is what feeds the
+// model enough of its own recent output to avoid covering the same story
+// again, whether via the same link or a different outlet's writeup of it.
+async function loadRecentCoverage() {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+
+  const since = new Date(Date.now() - RECENT_COVERAGE_DAYS * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+
+  const { data, error } = await supabase
+    .from("digest_entries")
+    .select("headline, url")
+    .gte("digest_date", since);
+
+  if (error) {
+    console.warn(`Couldn't load recent coverage (${error.message}) — continuing without it.`);
+    return [];
+  }
+  return data ?? [];
 }
 
 async function saveNewTerms(output) {
@@ -113,19 +175,66 @@ async function saveNewTerms(output) {
   console.log(`Glossary: saved up to ${byKey.size} new term(s).`);
 }
 
-async function summarize(rawItems, knownTerms = []) {
+// Claude replies with three separate arrays, shaped for what each section
+// actually needs (a launch has no "why it matters"; "also" has no terms).
+// Flattening them here — onto the same headline/what_happened/why_it_matters/
+// new_terms fields the "main" section already uses, just tagged with which
+// section they came from — means everything downstream (Supabase writes,
+// glossary extraction, reading-time estimation) stays a single flat list
+// instead of needing three separate code paths.
+function flattenSections(raw) {
+  const main = (raw.main ?? []).map((e) => ({
+    section: "main",
+    headline: e.headline,
+    url: e.url,
+    source: e.source,
+    what_happened: e.what_happened,
+    why_it_matters: e.why_it_matters,
+    new_terms: e.new_terms ?? [],
+  }));
+  const launches = (raw.launches ?? []).map((e) => ({
+    section: "launch",
+    headline: e.name,
+    url: e.url,
+    source: e.source,
+    what_happened: e.what_it_does,
+    why_it_matters: null,
+    new_terms: [],
+  }));
+  const also = (raw.also ?? []).map((e) => ({
+    section: "also",
+    headline: e.headline,
+    url: e.url,
+    source: e.source,
+    what_happened: e.summary,
+    why_it_matters: null,
+    new_terms: [],
+  }));
+
+  // Guard against an occasional malformed item (a missing field from the
+  // model) reaching the database as a broken row instead of just being
+  // dropped — headline and url are the two fields everything else (the
+  // link, the dedup list, the page itself) depends on.
+  const flattened = [...main, ...launches, ...also];
+  const valid = flattened.filter((e) => e.headline && e.url);
+  if (valid.length < flattened.length) {
+    console.warn(`Dropped ${flattened.length - valid.length} malformed entry/entries from Claude's response.`);
+  }
+  return valid;
+}
+
+async function summarize(rawItems, knownTerms = [], recentCoverage = []) {
   const readerProfile = await loadReaderProfile();
   const message = await anthropic.messages.create({
     // Sonnet for the judgment this job needs: deciding what's genuinely
     // relevant to one reader, and writing it in plain English without jargon.
     model: "claude-sonnet-5",
-    // Four fields per entry plus term definitions runs long; 2000 truncated
-    // mid-string and surfaced only as a confusing JSON parse error.
+    // Three sections' worth of fields, plus term definitions, runs long;
+    // 2000 truncated mid-string and surfaced only as a confusing JSON parse
+    // error.
     max_tokens: 8000,
-    system: buildSystemPrompt(readerProfile, knownTerms),
-    messages: [
-      { role: "user", content: JSON.stringify(rawItems) },
-    ],
+    system: buildSystemPrompt(readerProfile, knownTerms, recentCoverage),
+    messages: [{ role: "user", content: JSON.stringify(rawItems) }],
   });
 
   if (message.stop_reason === "max_tokens") {
@@ -141,13 +250,15 @@ async function summarize(rawItems, knownTerms = []) {
 
   // Strip accidental code fences if the model adds them
   const cleaned = text.replace(/```json|```/g, "").trim();
+  let parsed;
   try {
-    return JSON.parse(cleaned);
+    parsed = JSON.parse(cleaned);
   } catch (err) {
     throw new Error(
       `Claude did not return valid JSON (${err.message}). First 500 chars:\n${cleaned.slice(0, 500)}`
     );
   }
+  return flattenSections(parsed);
 }
 
 async function saveToSupabase(output) {
@@ -182,6 +293,7 @@ async function saveToSupabase(output) {
     url: entry.url,
     source: entry.source,
     article_read_minutes: entry.article_read_minutes ?? null,
+    section: entry.section,
   }));
 
   const { data, error } = await supabase
@@ -225,16 +337,27 @@ async function main() {
     console.log(`Glossary: reader already knows ${knownTerms.length} term(s).`);
   }
 
-  const digest = await summarize(raw.items, knownTerms);
+  const recentCoverage = await loadRecentCoverage();
+  if (recentCoverage.length > 0) {
+    console.log(
+      `Recent coverage: excluding ${recentCoverage.length} item(s) from the last ${RECENT_COVERAGE_DAYS} days.`
+    );
+  }
+
+  const digest = await summarize(raw.items, knownTerms, recentCoverage);
 
   // Best-effort and fully parallel — one slow or blocked article can't hold
   // up the others, and a failure here never fails the run (see
-  // article-reading-time.mjs).
-  console.log(`Estimating reading time for ${digest.length} linked article(s)...`);
+  // article-reading-time.mjs). Only "main" items get a reading-time estimate
+  // — launches and "also worth knowing" are one-line quick scans, not
+  // full articles the reader is being sent to read.
+  const mainCount = digest.filter((e) => e.section === "main").length;
+  console.log(`Estimating reading time for ${mainCount} linked article(s)...`);
   const digestWithReadingTime = await Promise.all(
     digest.map(async (entry) => ({
       ...entry,
-      article_read_minutes: await estimateArticleReadingMinutes(entry.url),
+      article_read_minutes:
+        entry.section === "main" ? await estimateArticleReadingMinutes(entry.url) : null,
     }))
   );
 

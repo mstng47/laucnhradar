@@ -93,7 +93,12 @@ async function fetchHN(config) {
 
 async function fetchFeed(feed, config) {
   const parsed = await parser.parseString(await fetchFeedXml(feed.url));
-  const cutoff = Date.now() - LOOKBACK_HOURS * 60 * 60 * 1000;
+  // Most feeds use the global window, but a source can override it —
+  // Product Hunt's launches are still "new" a couple of days later in a
+  // way that news isn't, and the AI-relevant slice of any one day's
+  // launches is thin.
+  const lookbackHours = feed.lookbackHours ?? LOOKBACK_HOURS;
+  const cutoff = Date.now() - lookbackHours * 60 * 60 * 1000;
 
   const items = [];
   for (const entry of parsed.items ?? []) {

@@ -30,6 +30,18 @@ alter table digest_entries alter column why_it_matters set not null;
 -- articles simply leave this null — so it stays nullable.
 alter table digest_entries add column if not exists article_read_minutes integer;
 
+-- Which of the three briefing sections this item belongs to: 'main' (full
+-- treatment), 'launch' (new product, one line), or 'also' (one line).
+-- Existing rows predate sections and default to 'main', which is the
+-- correct read for them — they were written in the old flat, full-detail
+-- format. 'launch' and 'also' items have no why_it_matters, so that column
+-- can no longer be required.
+alter table digest_entries add column if not exists section text not null default 'main';
+alter table digest_entries alter column why_it_matters drop not null;
+
+create index if not exists digest_entries_section_idx
+  on digest_entries (digest_date, section);
+
 create index if not exists digest_entries_digest_date_idx
   on digest_entries (digest_date desc);
 
