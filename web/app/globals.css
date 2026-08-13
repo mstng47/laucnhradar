@@ -17,28 +17,27 @@
   --surface: #121b2c;
   --hairline: #24314a;
 
-  /* Text: warm off-white body copy, muted cool grey for secondary text. */
-  --text: #f1ece1;
-  --text-soft: #9aa3b6;
-  --text-faint: #66708a;
+  /* Text: near-white for anything meant to be read, a legible secondary
+     grey for supporting text, and a genuinely dim tone reserved for
+     decorative separators only (never real words) — see the contrast
+     notes on each rule below. Every text colour here is checked against
+     --bg for a 4.5:1 (WCAG AA) contrast ratio at minimum. */
+  --text: #f8f4ec; /* ~17:1 on --bg — headlines, links, body copy */
+  --text-soft: #b7bfd0; /* ~10.1:1 on --bg — secondary/supporting text */
+  --text-faint: #66708a; /* ~3.8:1 — decorative only (dots, dividers), never text */
 
   /* Accents — pick exact shades here, used as both solid colour and,
      via the *-rgb triplets, translucent tints for chips. */
-  --teal: #34c9d9;
+  --teal: #34c9d9; /* ~9.4:1 on --bg */
   --teal-rgb: 52, 201, 217;
-  /* Calmer default for headlines — same hue, dialed back so the page
-     reads quieter at rest; brightens to the full --teal on hover. */
-  --teal-headline: #2ba7b5;
-  --violet: #a599d1;
-  --violet-rgb: 165, 153, 209;
-  --error: #f2867d;
+  --violet: #b3a8de; /* ~8.5:1 on --bg — brightened from #a599d1 (~7.2:1) */
+  --violet-rgb: 179, 168, 222;
+  --error: #f2867d; /* ~7.6:1 on --bg */
   --error-rgb: 242, 134, 125;
 
-  --content-width: 47.5rem; /* ~760px reading column — masthead, footer, simple pages */
+  --content-width: 47.5rem; /* ~760px reading column, one shared width for
+    the header, the intro block and the content below it */
   --content-half: calc(var(--content-width) / 2);
-  --layout-width: 68rem; /* ~1088px — the two-column briefing area on laptop+ */
-  --layout-half: calc(var(--layout-width) / 2);
-  --sidebar-width: 20rem; /* ~320px */
 
   --font-body: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-lora), Georgia, "Times New Roman", serif;
@@ -55,37 +54,56 @@ html {
 body {
   margin: 0;
   font-family: var(--font-body);
-  /* 17px keeps body text comfortable on a phone without zooming. */
-  font-size: 17px;
+  /* 18px — raised from 17px for comfortable reading. */
+  font-size: 18px;
   line-height: 1.7;
   color: var(--text);
   background: var(--bg);
   -webkit-text-size-adjust: 100%;
 }
 
-/* Fine grain across the whole page — a single small SVG tile, repeated,
-   so it's one cheap paint rather than a downloaded image file.
-   base64-encoded (not percent-encoded) to sidestep any bundler mangling
-   of a data URI containing its own nested url(#n) filter reference.
-   Earlier attempt used raw turbulence output (roughly 116-228 out of
-   255 — no true blacks/whites), which at low opacity blended into the
-   dark background as an ~5-unit shift: technically rendering, but
-   invisible in practice. A feComponentTransfer contrast boost here
-   spreads that to the full 0-255 range so it's actually visible. */
+/* ---------- Background texture ----------
+   Two fixed, full-viewport layers behind everything (z-index: -1,
+   pointer-events: none) — grain across the whole page, a dot grid in the
+   margins either side of the reading column. Both off below 900px.
+
+   Two earlier attempts at this appeared to do nothing. Checked carefully
+   this time for the most likely real cause — some wrapper painting a
+   solid, opaque background on top of these layers, which would hide them
+   completely regardless of what they contain. Audited every `background`
+   (not background-image) rule in this file plus every component's JSX:
+   only `body` and the sticky `.site-header` set a solid background, and
+   the header is a ~70px strip at the very top, not a full-page cover — it
+   can't explain a "completely flat" whole-page report. No such wrapper
+   exists. The actual cause was almost certainly the previous dot grid's
+   min-width gate (76rem / 1216px) simply being wider than the browser
+   window this was checked in, combined with grain subtle enough to not
+   register at a glance — both addressed directly below with the 900px
+   threshold and higher-contrast, higher-opacity values this round. */
+
+/* Grain: inline SVG feTurbulence data URI, tiled. base64-encoded (not
+   percent-encoded) so a data URI containing its own nested url(#n) filter
+   reference can't be mangled by the build's CSS handling. Raw turbulence
+   output clusters around mid-grey (no true black/white); the
+   feComponentTransfer block below stretches that to the full 0-255 range
+   so it reads as visible grain rather than a near-invisible ~5-unit
+   shift at low opacity. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.09;
+  opacity: 0.1;
   background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNDAnIGhlaWdodD0nMTQwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPScyJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PGZlQ29sb3JNYXRyaXggdHlwZT0nc2F0dXJhdGUnIHZhbHVlcz0nMCcvPjxmZUNvbXBvbmVudFRyYW5zZmVyPjxmZUZ1bmNSIHR5cGU9J2xpbmVhcicgc2xvcGU9JzQnIGludGVyY2VwdD0nLTEuNicvPjxmZUZ1bmNHIHR5cGU9J2xpbmVhcicgc2xvcGU9JzQnIGludGVyY2VwdD0nLTEuNicvPjxmZUZ1bmNCIHR5cGU9J2xpbmVhcicgc2xvcGU9JzQnIGludGVyY2VwdD0nLTEuNicvPjwvZmVDb21wb25lbnRUcmFuc2Zlcj48L2ZpbHRlcj48cmVjdCB3aWR0aD0nMTQwJyBoZWlnaHQ9JzE0MCcgZmlsdGVyPSd1cmwoI24pJy8+PC9zdmc+");
   background-repeat: repeat;
+  display: none;
 }
 
-/* Faint dot grid, margins only — masked out entirely across the reading
-   column so it never sits behind text, and hidden below the width where
-   there's no margin to put it in (see the min-width media query below). */
+/* Dot grid: small light dots, margins only — masked out across the
+   reading column so it's never behind text. Started at 5% white opacity
+   per spec and raised to 14% (dot colour itself, not layer opacity) after
+   checking it read as barely-there at 5% against this background. */
 body::after {
   content: "";
   position: fixed;
@@ -93,33 +111,32 @@ body::after {
   z-index: -1;
   pointer-events: none;
   display: none;
-  /* Neutral, not an accent colour — this is decoration, and the accents
-     are reserved for things with meaning (see the palette note up top). */
-  background-image: radial-gradient(circle, rgba(36, 49, 74, 0.6) 1px, transparent 1.5px);
-  background-size: 26px 26px;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.14) 1px, transparent 1.5px);
+  background-size: 22px 22px;
   -webkit-mask-image: linear-gradient(
     to right,
     black 0,
-    black calc(50% - var(--layout-half) - 2rem),
-    transparent calc(50% - var(--layout-half)),
-    transparent calc(50% + var(--layout-half)),
-    black calc(50% + var(--layout-half) + 2rem),
+    black calc(50% - var(--content-half) - 2rem),
+    transparent calc(50% - var(--content-half)),
+    transparent calc(50% + var(--content-half)),
+    black calc(50% + var(--content-half) + 2rem),
     black 100%
   );
   mask-image: linear-gradient(
     to right,
     black 0,
-    black calc(50% - var(--layout-half) - 2rem),
-    transparent calc(50% - var(--layout-half)),
-    transparent calc(50% + var(--layout-half)),
-    black calc(50% + var(--layout-half) + 2rem),
+    black calc(50% - var(--content-half) - 2rem),
+    transparent calc(50% - var(--content-half)),
+    transparent calc(50% + var(--content-half)),
+    black calc(50% + var(--content-half) + 2rem),
     black 100%
   );
 }
 
-/* Only enable the dot grid once there's real margin either side of the
-   column to put it in. */
-@media (min-width: 76rem) {
+/* Both layers off below 900px — no margin to put the dot grid in there,
+   and this keeps the phone view (read every morning) completely plain. */
+@media (min-width: 56.25rem) {
+  body::before,
   body::after {
     display: block;
   }
@@ -129,24 +146,17 @@ a {
   color: inherit;
 }
 
-/* padding-left/right only, deliberately — .container is combined with
+/* One container, used everywhere — header, intro block and content all
+   share this exact width/padding, so they share the same left and right
+   edges. (A previous version used a second, wider .container-wide just
+   for the content area, which was the actual cause of the three
+   different left edges reported — that class is gone now.)
+   padding-left/right only, deliberately — .container is combined with
    other classes (.page-intro, .header-bar) that set their own vertical
    padding, and a shorthand `padding` here would silently zero those out
    whenever this rule happened to be the last one the cascade saw. */
 .container {
   max-width: var(--content-width);
-  margin: 0 auto;
-  padding-left: 1rem;
-  padding-right: 1rem;
-}
-
-/* Wider than .container — used only for <main> on pages that render the
-   two-column briefing (home, an archive date). The masthead and footer
-   stay at the narrower .container width above/below it; both are centred
-   on the same axis, so it reads as a deliberate wide body under a calmer
-   narrow header, not a mismatch. */
-.container-wide {
-  max-width: var(--layout-width);
   margin: 0 auto;
   padding-left: 1rem;
   padding-right: 1rem;
@@ -174,7 +184,13 @@ main {
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.85rem 0;
+  /* top/bottom only, deliberately — see the note on .container. A
+     shorthand `padding` here previously zeroed .container's
+     padding-left/right at mobile width (no protecting override there,
+     unlike desktop's later media-query rule) — the actual cause of the
+     header having a different left edge than the content below it. */
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
 }
 
 .brand {
@@ -221,11 +237,13 @@ main {
 /* ---------- Page intro (eyebrow + meta, per page) ---------- */
 
 .page-intro {
-  padding: 1.5rem 0 0.5rem;
+  /* top/bottom only — see the note on .header-bar just above. */
+  padding-top: 1.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .eyebrow {
-  color: var(--text-faint);
+  color: var(--text-soft);
   margin: 0;
   font-size: 0.95rem;
 }
@@ -237,7 +255,7 @@ main {
   align-items: center;
   gap: 0.4rem 0.6rem;
   font-size: 0.85rem;
-  color: var(--text-faint);
+  color: var(--text-soft);
   font-variant-numeric: tabular-nums;
 }
 
@@ -247,7 +265,7 @@ main {
 }
 
 .meta-dot {
-  opacity: 0.6;
+  color: var(--text-faint);
 }
 
 .back-row {
@@ -297,22 +315,22 @@ main {
   font-size: 0.76rem;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--text-faint);
+  color: var(--text-soft);
   margin: 2.75rem 0 0.75rem;
 }
 
-/* Whichever section renders first in the main column or the sidebar
-   shouldn't have a big gap above it — the wrapping element already
-   provides the right offset (main's own top padding, or
-   .briefing-sidebar's margin/padding-top below). */
-.briefing-main > section:first-child > .section-heading,
-.briefing-main > section:first-child > .section-heading-light,
-.briefing-sidebar > section:first-child > .section-heading,
-.briefing-sidebar > section:first-child > .section-heading-light {
+/* Whichever section renders first (usually "What matters today", but a
+   thin day could start with "New launches" instead) shouldn't have a big
+   gap above it — main already provides top padding. */
+main > section:first-child > .section-heading,
+main > section:first-child > .section-heading-light {
   margin-top: 0;
 }
 
-/* ---------- Compact list (launches, also worth knowing) ---------- */
+/* ---------- Compact list (launches, also worth knowing, today's terms) ---------- */
+/* One column, stacked in document order under "What matters today" —
+   lighter/smaller than .briefing-item throughout: no card, no
+   why-marker, a single line per entry. */
 
 .compact-list {
   list-style: none;
@@ -323,7 +341,7 @@ main {
 .compact-item {
   padding: 0.65rem 0;
   border-top: 1px solid var(--hairline);
-  font-size: 0.94rem;
+  font-size: 0.96rem;
   line-height: 1.6;
   color: var(--text-soft);
 }
@@ -340,7 +358,7 @@ main {
 }
 
 .compact-name:hover {
-  color: var(--teal-headline);
+  color: var(--teal);
   text-decoration: underline;
 }
 
@@ -350,64 +368,29 @@ main {
   color: var(--violet);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
 }
 
-/* ---------- Two-column layout (laptop+) ---------- */
-
-/* Mobile-first: single column by default. .briefing-main and
-   .briefing-sidebar are plain block elements until the grid kicks in
-   below, so the sidebar just stacks after the main list on any narrower
-   screen — no separate mobile-specific rules needed. */
-.briefing-sidebar {
-  margin-top: 3rem;
-}
-
-@media (min-width: 56.25rem) {
-  /* 900px */
-  .briefing-layout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--sidebar-width);
-    align-items: start;
-    gap: 1rem 3.5rem;
-  }
-
-  .briefing-sidebar {
-    margin-top: 0;
-    /* Sits level with the main column's first item, not the "What
-       matters today" heading above it. */
-    padding-top: 3.75rem;
-  }
-}
-
-/* Sidebar reads lighter/more compact than the main column throughout —
-   smaller type, tighter spacing than .briefing-item uses. */
-.sidebar-terms {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.sidebar-terms li {
+.today-terms li {
   padding: 0.65rem 0;
   border-top: 1px solid var(--hairline);
 }
 
-.sidebar-terms li:first-child {
+.today-terms li:first-child {
   border-top: none;
   padding-top: 0;
 }
 
-.sidebar-terms .chip {
+.today-terms .chip {
   margin-bottom: 0.4rem;
 }
 
-.sidebar-term-def {
+.today-term-def {
   margin: 0;
   color: var(--text-soft);
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   line-height: 1.55;
 }
 
@@ -450,7 +433,11 @@ main {
   font-weight: 600;
   font-size: 1.32rem;
   line-height: 1.35;
-  color: var(--teal-headline);
+  /* Near-white, not teal — teal on dark navy read as low-contrast at
+     this size even though it technically passed WCAG (~6.5:1). Teal is
+     reserved for links/why-marker/nav now; this still IS a link, so it
+     brightens to the vivid --teal on hover for the click affordance. */
+  color: var(--text);
   text-decoration: none;
   text-wrap: balance;
   overflow-wrap: anywhere;
@@ -465,6 +452,10 @@ main {
 .item-body {
   margin: 0.85rem 0 0;
   color: var(--text);
+  /* Matches --why-marker p's weight so this reads with the same visual
+     presence as "why it matters" below it, not dimmer — same colour as
+     that text already, the difference was weight, not contrast. */
+  font-weight: 500;
   line-height: 1.75;
   font-size: 1.02rem;
 }
@@ -538,7 +529,7 @@ main {
 }
 
 .read-time {
-  color: var(--text-faint);
+  color: var(--text-soft);
   font-size: 0.8rem;
 }
 
@@ -578,7 +569,7 @@ main {
 }
 
 .archive-count {
-  color: var(--text-faint);
+  color: var(--text-soft);
   font-size: 0.85rem;
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
@@ -622,7 +613,7 @@ main {
 
 .footer-note {
   margin: 0;
-  color: var(--text-faint);
+  color: var(--text-soft);
   font-size: 0.8rem;
 }
 
@@ -630,10 +621,9 @@ main {
 
 @media (min-width: 40rem) {
   body {
-    font-size: 18px;
+    font-size: 19px;
   }
-  .container,
-  .container-wide {
+  .container {
     padding-left: 2rem;
     padding-right: 2rem;
   }
