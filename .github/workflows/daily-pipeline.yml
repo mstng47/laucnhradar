@@ -2,8 +2,11 @@ name: Daily pipeline
 
 on:
   schedule:
-    # 07:00 UTC every day
-    - cron: '0 3 * * *'
+    # 04:00 UTC = 6am Paris time in summer (CEST, UTC+2). GitHub's cron
+    # doesn't adjust for daylight saving, so this drifts to 7am Paris once
+    # winter time (CET, UTC+1) starts in late October — nudge this forward
+    # to 05:00 UTC then if you want it back to 6am.
+    - cron: '0 4 * * *'
   workflow_dispatch: {}
 
 jobs:
