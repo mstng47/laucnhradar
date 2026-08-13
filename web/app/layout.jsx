@@ -17,7 +17,7 @@ const lora = Lora({
 });
 
 export const metadata = {
-  title: "LaunchRadar",
+  title: "Sift",
   description: "Your daily AI briefing",
 };
 
