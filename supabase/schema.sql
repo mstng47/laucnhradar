@@ -42,6 +42,14 @@ alter table digest_entries alter column why_it_matters drop not null;
 create index if not exists digest_entries_section_idx
   on digest_entries (digest_date, section);
 
+-- The expanded, in-place "read here" version of a "main" item — an original
+-- synthesis of its source, generated once by the pipeline and stored so the
+-- website never regenerates it on page load. Null for launch/also items
+-- (they're one-liners with nothing to expand) and for any main item whose
+-- source couldn't be fetched or summarized — those simply show no expand
+-- control on the site.
+alter table digest_entries add column if not exists deep_dive text;
+
 create index if not exists digest_entries_digest_date_idx
   on digest_entries (digest_date desc);
 
