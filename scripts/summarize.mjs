@@ -1,11 +1,19 @@
 // Sends raw.json to Claude, gets back a personalized briefing for the one
 // reader described in reader-profile.md, writes output/latest.json.
 
+// Must load first — deep-dive.mjs reads ANTHROPIC_API_KEY when it's
+// imported (to construct its own Anthropic client), which happens before
+// any of this file's own top-level code runs. Importing dotenv/config
+// after that point would leave it looking at an unset key when run locally
+// off a .env file (GitHub Actions is unaffected — it sets real env vars
+// before Node starts).
+import "dotenv/config";
+
 import { readFile, writeFile } from "fs/promises";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 import { estimateArticleReadingMinutes } from "./article-reading-time.mjs";
-import "dotenv/config";
+import { generateDeepDive } from "./deep-dive.mjs";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -320,6 +328,7 @@ async function saveToSupabase(output) {
     source: entry.source,
     article_read_minutes: entry.article_read_minutes ?? null,
     section: entry.section,
+    deep_dive: entry.deep_dive ?? null,
   }));
 
   const { data, error } = await supabase
@@ -373,18 +382,25 @@ async function main() {
   const digest = await summarize(raw.items, knownTerms, recentCoverage);
 
   // Best-effort and fully parallel — one slow or blocked article can't hold
-  // up the others, and a failure here never fails the run (see
-  // article-reading-time.mjs). Only "main" items get a reading-time estimate
-  // — launches and "also worth knowing" are one-line quick scans, not
-  // full articles the reader is being sent to read.
+  // up the others, and neither reading-time estimation nor deep-dive
+  // generation can fail the run (see article-reading-time.mjs and
+  // deep-dive.mjs). Only "main" items get either — launches and "also worth
+  // knowing" are one-line quick scans, not full articles the reader is
+  // being sent to read or might want to expand.
   const mainCount = digest.filter((e) => e.section === "main").length;
-  console.log(`Estimating reading time for ${mainCount} linked article(s)...`);
+  console.log(`Enriching ${mainCount} main item(s) with reading time and a deep dive...`);
+  const readerProfile = await loadReaderProfile();
   const digestWithReadingTime = await Promise.all(
-    digest.map(async (entry) => ({
-      ...entry,
-      article_read_minutes:
-        entry.section === "main" ? await estimateArticleReadingMinutes(entry.url) : null,
-    }))
+    digest.map(async (entry) => {
+      if (entry.section !== "main") {
+        return { ...entry, article_read_minutes: null, deep_dive: null };
+      }
+      const [article_read_minutes, deep_dive] = await Promise.all([
+        estimateArticleReadingMinutes(entry.url),
+        generateDeepDive(entry, readerProfile),
+      ]);
+      return { ...entry, article_read_minutes, deep_dive };
+    })
   );
 
   const output = {

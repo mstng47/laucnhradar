@@ -1,30 +1,42 @@
 import { getSupabaseClient } from "../supabase";
 
 const ENTRY_COLUMNS =
+  "id, headline, what_happened, why_it_matters, new_terms, url, source, digest_date, article_read_minutes, section, deep_dive";
+
+// Same as ENTRY_COLUMNS minus `deep_dive`, for reading before the migration
+// in MANUAL_STEPS.md has been run.
+const ENTRY_COLUMNS_WITHOUT_DEEP_DIVE =
   "id, headline, what_happened, why_it_matters, new_terms, url, source, digest_date, article_read_minutes, section";
 
-// Same as ENTRY_COLUMNS minus `section`, for reading before the migration
-// in MANUAL_STEPS.md has been run.
+// Same again minus `section` too, for reading before that earlier migration
+// has been run.
 const ENTRY_COLUMNS_WITHOUT_SECTION =
   "id, headline, what_happened, why_it_matters, new_terms, url, source, digest_date, article_read_minutes";
 
-function isMissingSectionColumn(error) {
+function isMissingColumn(error, column) {
   // 42703 is Postgres's "undefined_column" code; the message check is a
   // fallback in case a Postgrest version ever omits it.
-  return error.code === "42703" || /\bsection\b.*does not exist/i.test(error.message ?? "");
+  return error.code === "42703" || new RegExp(`\\b${column}\\b.*does not exist`, "i").test(error.message ?? "");
 }
 
-// Runs the same query with and without the `section` column, so the site
-// keeps working (everything just reads as one "main" section) if the
-// migration in MANUAL_STEPS.md hasn't been run yet, rather than erroring.
+// Runs the same query, falling back a column at a time, so the site keeps
+// working (just without that column's data) if a migration in
+// MANUAL_STEPS.md hasn't been run yet, rather than erroring.
 async function selectEntries(supabase, applyFilters) {
   let { data, error } = await applyFilters(supabase.from("digest_entries").select(ENTRY_COLUMNS));
 
-  if (error && isMissingSectionColumn(error)) {
+  if (error && isMissingColumn(error, "deep_dive")) {
+    ({ data, error } = await applyFilters(
+      supabase.from("digest_entries").select(ENTRY_COLUMNS_WITHOUT_DEEP_DIVE)
+    ));
+    if (!error) data = (data ?? []).map((row) => ({ ...row, deep_dive: null }));
+  }
+
+  if (error && isMissingColumn(error, "section")) {
     ({ data, error } = await applyFilters(
       supabase.from("digest_entries").select(ENTRY_COLUMNS_WITHOUT_SECTION)
     ));
-    if (!error) data = (data ?? []).map((row) => ({ ...row, section: "main" }));
+    if (!error) data = (data ?? []).map((row) => ({ ...row, section: "main", deep_dive: null }));
   }
 
   if (error) throw new Error(`Supabase query failed: ${error.message}`);

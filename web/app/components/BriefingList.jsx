@@ -1,3 +1,5 @@
+import DeepDive from "./DeepDive";
+
 export default function BriefingList({ entries }) {
   return (
     <ol className="briefing-list">
@@ -44,6 +46,8 @@ export default function BriefingList({ entries }) {
               )}
             </div>
           </div>
+
+          <DeepDive text={entry.deep_dive} />
         </li>
       ))}
     </ol>

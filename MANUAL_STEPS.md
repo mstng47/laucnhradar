@@ -37,6 +37,47 @@ create index if not exists digest_entries_section_idx on digest_entries (digest_
 
 ---
 
+## Add the "deep dive" column
+
+Each item in **What matters today** can now be expanded in place for a
+denser, fuller version — written fresh by Claude, not copied from the
+source — so you can understand it without leaving the site or opening a
+100-page PDF. The database needs one column to store that generated text.
+
+**Run this before or right after merging — until you do, the daily pipeline
+run will fail** with a red X on GitHub (Actions → Daily pipeline). Nothing
+is lost — once you've added the column, re-run the pipeline manually (see
+"Why reading times might not show up right away" below for how) and it'll
+pick up normally the next morning either way.
+
+1. Go to **https://supabase.com** and open your project.
+2. In the left sidebar, click **SQL Editor**.
+3. Click **New query** (top of the page).
+4. Copy the line below and paste it into the empty box.
+5. Click the green **Run** button (bottom right). It may also say **Run CTRL+Enter**.
+6. You should see **"Success. No rows returned"**. That means it worked.
+
+```sql
+alter table digest_entries add column if not exists deep_dive text;
+```
+
+> Safe to run as many times as you like. It only adds a column — nothing
+> existing is touched or deleted.
+
+### What to expect on API cost
+
+This adds one more Claude call per item in "What matters today" (up to 5 a
+day). Most days that's a few cents on top of the existing daily cost — most
+sources are short news articles, and the deep dive for those is only a
+couple of paragraphs. On a day where one of the items links to a long
+report or whitepaper, that one item costs more (the fullest-treatment
+version reads the report's full text), which can push that day's extra
+cost up to somewhere around $0.30–$0.50. There's no per-day cap on this —
+if that ever feels like too much, ask your developer (or Claude) to lower
+the caps in `scripts/deep-dive.mjs`.
+
+---
+
 ## Why reading times might not show up right away
 
 Each item can show how long the *original linked article* takes to read,
