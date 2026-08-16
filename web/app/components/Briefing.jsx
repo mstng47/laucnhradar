@@ -1,5 +1,6 @@
 import BriefingList from "./BriefingList";
 import CompactList from "./CompactList";
+import StoryReveal from "./StoryReveal";
 import { groupSections, collectTermsToday } from "../lib/format";
 
 // Single column, sections stacked in reading order: full-detail items
@@ -12,6 +13,8 @@ export default function Briefing({ entries }) {
 
   return (
     <>
+      <StoryReveal />
+
       {main.length > 0 && (
         <section>
           <h2 className="section-heading">What matters today</h2>

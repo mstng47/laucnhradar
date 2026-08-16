@@ -15,6 +15,7 @@
      meaning based on where you are on the page) so a component's colour
      never depends on which parent happens to render it. */
   --chrome-bg: #0b1220;
+  --chrome-bg-rgb: 11, 18, 32; /* same colour, for the translucent scrolled-header state */
   --chrome-hairline: #24314a;
   --chrome-text: #f8f4ec; /* ~17:1 on --chrome-bg */
   --chrome-text-soft: #b7bfd0; /* ~10.1:1 on --chrome-bg */
@@ -29,7 +30,6 @@
   /* Every text colour here is checked against --bg for a 4.5:1 (WCAG AA)
      contrast ratio at minimum. */
   --text: #16171c; /* ~18.5:1 on --bg — headlines, links, body copy */
-  --text-rgb: 22, 23, 28; /* same colour, for the low-opacity dot-grid texture */
   --text-soft: #53565f; /* ~7.4:1 on --bg — secondary/supporting text */
   --text-faint: #9c988a; /* ~2.7:1 — decorative only (dots, dividers), never text */
 
@@ -48,9 +48,15 @@
   --marker: #e0451f;
   --marker-rgb: 224, 69, 31;
 
-  --content-width: 47.5rem; /* ~760px reading column, one shared width for
-    the header, the intro block and the content below it */
-  --content-half: calc(var(--content-width) / 2);
+  --content-width: 55rem; /* 880px — shared by the header bar and the
+    white content panel; identical value, identical horizontal padding
+    (see .container), so their edges land pixel-for-pixel together */
+
+  /* Single source of truth for both frames' width, so they can never
+     drift apart again the way header and panel once did. Mobile keeps a
+     minimal 1rem gutter; the desktop override further down widens it for
+     the "floating sheet on a dark surface" look. */
+  --frame-width: min(calc(100% - 2rem), var(--content-width));
 
   /* Chamfered-corner frame: shared by every framed content block (see
      "Framed content blocks" below) so the cut always reads as the same
@@ -77,22 +83,14 @@
   box-sizing: border-box;
 }
 
+/* The page scrolls as one normal document, native scrollbar, no nested
+   scroll container — the previous flex-shell-plus-inner-scroll-region
+   produced a second scrollbar and, because that inner region's own
+   scrollbar ate into its width, a pixel misalignment against the header
+   outside it. Both bugs go away once there's only one scrolling box: the
+   document itself. */
 html {
-  background: var(--chrome-bg);
-}
-
-/* Body is the dark canvas the light content sits on — not the reading
-   surface itself. Actual reading colour/background comes from --text/--bg
-   on the content elements below, which stay light.
-
-   height + overflow: hidden here (and on html) is what makes that canvas
-   genuinely static: the viewport itself never scrolls. Only
-   .scroll-region, the flex child between the fixed header and footer,
-   scrolls — see "App shell" below. */
-html,
-body {
-  height: 100%;
-  overflow: hidden;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -102,37 +100,74 @@ body {
   font-size: 18px;
   line-height: 1.7;
   color: var(--chrome-text);
+  /* Fallback paint only — the actual background is .bg-fixed below,
+     kept in sync so there's no flash before it paints. */
   background: var(--chrome-bg);
   -webkit-text-size-adjust: 100%;
 }
 
-/* ---------- App shell ----------
-   Header and footer are fixed-height flex children that never scroll;
-   .scroll-region is the one flex child that does, in its own scrolling
-   box. min-height: 0 overrides the flex default (which would otherwise
-   size this to its content and defeat the scroll) — needed for Firefox
-   in particular. dvh after vh: browsers that don't understand dvh just
-   keep the vh value; ones that do get the correct height on mobile
-   despite the browser chrome resizing the viewport as you scroll. */
-.app-shell {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  height: 100dvh;
+/* ---------- Fixed background layer ----------
+   A dedicated element rather than body's own background so it can carry
+   texture (see "Background texture" below) independently of body, which
+   scrolls with the document now. position: fixed + inset: 0 pins it to
+   the viewport regardless of scroll position — content scrolls over it,
+   it never moves. */
+.bg-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--chrome-bg);
+  pointer-events: none;
 }
 
-.scroll-region {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
+/* Background texture: a faint constellation — nodes connected by thin
+   lines, plus a few scattered unconnected dots — tiled across the fixed
+   dark layer. Baked as a small inline SVG (data URI, base64 so the
+   markup's own quotes/commas can't be mistaken for CSS syntax) rather
+   than a raster file: a few KB of vector shapes, not an image asset.
+   Colour is baked into the SVG (a desaturated teal, --chrome-teal pulled
+   toward grey); the 8-12% visibility target comes from this layer's own
+   opacity below, not the SVG, so it can be tuned without re-encoding it.
 
-/* Background texture: the previous full-viewport grain + margin dot-grid
-   was built for an all-dark page with reading content masked out of it.
-   Now that content lives in light framed blocks on a dark canvas, the
-   dot grid moves inside those blocks instead (see "Framed content
-   blocks" below) — nothing needed at the body level any more. */
+   Two masks, composited with `intersect` (visible only where both are
+   opaque): one hides the texture behind the centre column where the
+   panel sits, concentrating it in the side gutters instead; the other
+   fades it out for the first 120px so the strip behind the sticky header
+   always stays clean. Both are sized off .bg-fixed's own box — the
+   viewport, not the page — so neither shifts as you scroll. */
+.bg-fixed::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSczMDAnIGhlaWdodD0nMzAwJz48ZyBmaWxsPSdub25lJyBzdHJva2U9J3JnYig5MCwxNTAsMTU3KScgc3Ryb2tlLXdpZHRoPScxJz48bGluZSB4MT0nNDAnIHkxPSc2MCcgeDI9JzEyMCcgeTI9JzQwJy8+PGxpbmUgeDE9JzEyMCcgeTE9JzQwJyB4Mj0nMjAwJyB5Mj0nOTAnLz48bGluZSB4MT0nMjAwJyB5MT0nOTAnIHgyPScyNjAnIHkyPSc1MCcvPjxsaW5lIHgxPSc3MCcgeTE9JzE1MCcgeDI9JzEyMCcgeTI9JzQwJy8+PGxpbmUgeDE9JzcwJyB5MT0nMTUwJyB4Mj0nMTgwJyB5Mj0nMTYwJy8+PGxpbmUgeDE9JzE4MCcgeTE9JzE2MCcgeDI9JzI0MCcgeTI9JzE5MCcvPjxsaW5lIHgxPScyNDAnIHkxPScxOTAnIHgyPScyNzAnIHkyPScyNzAnLz48bGluZSB4MT0nMzAnIHkxPScyMzAnIHgyPSc3MCcgeTI9JzE1MCcvPjxsaW5lIHgxPScxNTAnIHkxPScyNjAnIHgyPScxODAnIHkyPScxNjAnLz48bGluZSB4MT0nMzAnIHkxPScyMzAnIHgyPScxNTAnIHkyPScyNjAnLz48L2c+PGcgZmlsbD0ncmdiKDkwLDE1MCwxNTcpJz48Y2lyY2xlIGN4PSc0MCcgY3k9JzYwJyByPScyJy8+PGNpcmNsZSBjeD0nMTIwJyBjeT0nNDAnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzIwMCcgY3k9JzkwJyByPScyJy8+PGNpcmNsZSBjeD0nMjYwJyBjeT0nNTAnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzcwJyBjeT0nMTUwJyByPScyLjInLz48Y2lyY2xlIGN4PScxODAnIGN5PScxNjAnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzI0MCcgY3k9JzE5MCcgcj0nMicvPjxjaXJjbGUgY3g9JzMwJyBjeT0nMjMwJyByPScxLjYnLz48Y2lyY2xlIGN4PScxNTAnIGN5PScyNjAnIHI9JzInLz48Y2lyY2xlIGN4PScyNzAnIGN5PScyNzAnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzEwMCcgY3k9JzIyMCcgcj0nMS4yJy8+PGNpcmNsZSBjeD0nMjIwJyBjeT0nMzAnIHI9JzEuMicvPjxjaXJjbGUgY3g9JzEwJyBjeT0nMTAwJyByPScxLjInLz48Y2lyY2xlIGN4PScyOTAnIGN5PScxNTAnIHI9JzEuMicvPjxjaXJjbGUgY3g9JzE2MCcgY3k9JzkwJyByPScxLjInLz48L2c+PC9zdmc+");
+  background-repeat: repeat;
+  background-size: 300px 300px;
+  opacity: 0.1;
+  mask-image:
+    linear-gradient(
+      to right,
+      black 0,
+      black calc(50% - (var(--content-width) / 2)),
+      transparent calc(50% - (var(--content-width) / 2)),
+      transparent calc(50% + (var(--content-width) / 2)),
+      black calc(50% + (var(--content-width) / 2)),
+      black 100%
+    ),
+    linear-gradient(to bottom, transparent 0, transparent 120px, black 120px, black 100%);
+  mask-composite: intersect, intersect;
+  -webkit-mask-image:
+    linear-gradient(
+      to right,
+      black 0,
+      black calc(50% - (var(--content-width) / 2)),
+      transparent calc(50% - (var(--content-width) / 2)),
+      transparent calc(50% + (var(--content-width) / 2)),
+      black calc(50% + (var(--content-width) / 2)),
+      black 100%
+    ),
+    linear-gradient(to bottom, transparent 0, transparent 120px, black 120px, black 100%);
+  -webkit-mask-composite: source-in, source-in;
+}
 
 a {
   color: inherit;
@@ -156,7 +191,7 @@ a {
 
 main {
   color: var(--text);
-  padding: 1.5rem 0 4rem;
+  padding: 1.5rem 0 1rem;
 }
 
 /* ---------- Framed content blocks ----------
@@ -167,56 +202,67 @@ main {
    inset, the inner layer is content-colour clipped to the same shape, so
    the 1px gap between them reads as a border that actually turns the
    corner. */
+/* filter: drop-shadow, not box-shadow — a box-shadow gets clipped away
+   by clip-path along with the rest of the box's decoration, cutting off
+   abruptly at the chamfered corners. drop-shadow runs after clipping, so
+   it hugs the cut shape instead. This is what makes the panel read as a
+   physical sheet resting on the dark surface rather than a block welded
+   to it. */
 .content-frame {
-  width: min(calc(100% - 2rem), calc(var(--content-width) + 5rem));
+  width: var(--frame-width);
   margin: 0.75rem auto 2.5rem;
   padding: 1px;
   background: var(--hairline);
   clip-path: var(--frame-clip);
+  filter: drop-shadow(0 24px 64px rgba(0, 0, 0, 0.45));
 }
 
+/* Solid — no texture inside the panel. It's clean paper; the texture
+   lives on the dark surface behind it (see .bg-fixed / "Background
+   texture" further up). */
 .content-frame-inner {
   background-color: var(--bg);
   clip-path: var(--frame-clip);
 }
 
-/* Dot grid only above the width that gives it visible margin either side
-   of the text column — kept off on mobile so the page stays plain there,
-   same reasoning as the rest of this site's small-screen-first approach. */
-@media (min-width: 40rem) {
-  .content-frame-inner {
-    background-image: radial-gradient(circle, rgba(var(--text-rgb), 0.08) 1px, transparent 1.5px);
-    background-size: 20px 20px;
-  }
-}
-
 /* ---------- Nav header ---------- */
 
-/* A fixed flex child of .app-shell now (see "App shell" above), not a
-   sticky element — it never scrolls because .scroll-region is the only
-   thing that does. flex-shrink: 0 stops it being squashed if the content
-   below ever pushes for space. No background of its own: the dark body
-   shows through around the narrower frame below it. */
+/* Sticky, in normal document flow — the page scrolls under it. No
+   background of its own: the dark body shows through around the
+   narrower frame below it. */
 .site-header {
-  flex-shrink: 0;
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 10;
 }
 
-/* Same width as .content-frame and the same border/clip-path pairing, so
-   the header reads as the top of one continuous framed shell rather than
-   a separate full-width bar. */
+/* Exactly --content-width, same as .content-frame below and the same
+   border/clip-path pairing, so the header and panel edges land on the
+   same pixel — see the note on --content-width. */
 .header-frame {
-  width: min(calc(100% - 2rem), calc(var(--content-width) + 5rem));
+  width: var(--frame-width);
   margin: 1rem auto;
   padding: 1px;
   background: var(--chrome-hairline);
   clip-path: var(--frame-clip);
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
 }
 
 .header-frame-inner {
   background: var(--chrome-bg);
   clip-path: var(--frame-clip);
+  transition: background-color 150ms ease, backdrop-filter 150ms ease;
+}
+
+/* Toggled by SiteHeader once window.scrollY passes 80px. Backdrop blur
+   needs something translucent to blur through, so the background drops
+   its opacity here rather than swapping to a different solid colour. */
+.site-header.is-scrolled .header-frame-inner {
+  background: rgba(var(--chrome-bg-rgb), 0.75);
+  /* Unprefixed only — the build's own autoprefixer adds -webkit- for
+     Safari (visible in the transition list above); writing both by hand
+     here made it drop the standard property instead of keeping it. */
+  backdrop-filter: blur(8px);
 }
 
 .header-bar {
@@ -231,6 +277,12 @@ main {
      header having a different left edge than the content below it. */
   padding-top: 0.85rem;
   padding-bottom: 0.85rem;
+  transition: padding 150ms ease;
+}
+
+.site-header.is-scrolled .header-bar {
+  padding-top: 0.55rem;
+  padding-bottom: 0.55rem;
 }
 
 .brand {
@@ -274,11 +326,45 @@ main {
   color: var(--chrome-teal);
 }
 
+/* ---------- Masthead ---------- */
+/* Top of every panel, above whatever the page itself renders — today's
+   date rather than the briefing's own date, so it reads the same across
+   every page/section (see the note in Masthead.jsx). font-variant-caps,
+   not text-transform: uppercase — the markup keeps normal casing so the
+   browser can actually render true small-caps glyphs instead of just
+   full-height capitals. */
+.masthead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--hairline);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.02em;
+}
+
+.masthead-brand {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.masthead-date {
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 /* ---------- Page intro (eyebrow + meta, per page) ---------- */
 
 .page-intro {
-  /* top/bottom only — see the note on .header-bar just above. */
-  padding-top: 1.5rem;
+  /* top/bottom only — see the note on .header-bar just above. Trimmed
+     from 1.5rem now that .masthead sits above this and already supplies
+     the panel's top breathing room. */
+  padding-top: 0.75rem;
   padding-bottom: 0.5rem;
 }
 
@@ -327,7 +413,10 @@ main {
 /* ---------- Stub pages (About, Contact) ---------- */
 
 .stub-copy {
-  max-width: 38rem;
+  max-width: 70ch; /* ~68-72 character measure, same target as the
+    reading body text below (.item-body etc.) — ch is the width of "0"
+    in the current font, the standard unit for capping line length
+    regardless of font metrics or the panel's own pixel width. */
   margin: 0;
   padding: 1.5rem 0 2rem;
   color: var(--text);
@@ -463,6 +552,24 @@ main > section:first-child > .section-heading-light {
   padding-top: 0.5rem;
 }
 
+/* Fade-and-rise as each story enters the viewport (see StoryReveal.jsx),
+   scoped entirely inside this media query — a user with no-preference
+   never set gets .briefing-item at its normal, final opacity/position
+   from the very first paint; there's no hidden state for JS to fail to
+   reveal. */
+@media (prefers-reduced-motion: no-preference) {
+  .briefing-item {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 400ms ease, transform 400ms ease;
+  }
+
+  .briefing-item.reveal-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .item-head {
   display: flex;
   align-items: baseline;
@@ -501,6 +608,7 @@ main > section:first-child > .section-heading-light {
 }
 
 .item-body {
+  max-width: 70ch; /* newspaper measure — see the note on .stub-copy */
   margin: 0.85rem 0 0;
   color: var(--text);
   /* Matches --why-marker p's weight so this reads with the same visual
@@ -528,6 +636,7 @@ main > section:first-child > .section-heading-light {
 }
 
 .why-marker p {
+  max-width: 70ch; /* newspaper measure — see the note on .stub-copy */
   margin: 0;
   color: var(--text);
   font-weight: 500;
@@ -624,6 +733,7 @@ main > section:first-child > .section-heading-light {
 }
 
 .deep-dive-content-inner p {
+  max-width: 70ch; /* newspaper measure — see the note on .stub-copy */
   margin: 0.9rem 0 0;
   color: var(--text);
   font-weight: 500;
@@ -636,6 +746,7 @@ main > section:first-child > .section-heading-light {
 }
 
 .deep-dive-list {
+  max-width: 70ch; /* newspaper measure — see the note on .stub-copy */
   list-style: none;
   margin: 0.9rem 0 0;
   padding-left: 0;
@@ -710,50 +821,43 @@ main > section:first-child > .section-heading-light {
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- Footer ---------- */
-
-/* Fixed flex child of .app-shell, same as .site-header — stays put while
-   .scroll-region scrolls above it. */
-.site-footer {
-  flex-shrink: 0;
-  background: var(--chrome-bg);
-  border-top: 1px solid var(--chrome-hairline);
-  padding: 1.75rem 0 2.5rem;
+/* ---------- Sign-off ----------
+   Was a separate dark footer bar; now the quiet end of the briefing,
+   inside the white panel itself (same .container + text-soft treatment
+   as the rest of the reading content, not chrome). */
+.sign-off {
+  margin-top: 3rem;
+  padding-top: 1.25rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid var(--hairline);
+  color: var(--text-soft);
 }
 
-.footer-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.footer-about {
-  margin: 0;
-  color: var(--chrome-text-soft);
-  font-size: 0.88rem;
+.sign-off-about {
+  margin: 0 0 0.5rem;
+  font-size: 0.82rem;
   line-height: 1.6;
 }
 
-.footer-nav {
-  display: flex;
-  gap: 1rem;
+.sign-off-nav {
+  margin-bottom: 0.5rem;
 }
 
-.footer-nav a {
-  color: var(--chrome-teal);
+.sign-off-nav a {
+  color: var(--text-soft);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 600;
 }
 
-.footer-nav a:hover {
+.sign-off-nav a:hover {
+  color: var(--text);
   text-decoration: underline;
 }
 
-.footer-note {
+.sign-off-note {
   margin: 0;
-  color: var(--chrome-text-soft);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 /* ---------- Desktop ---------- */
@@ -762,12 +866,24 @@ main > section:first-child > .section-heading-light {
   body {
     font-size: 19px;
   }
+  :root {
+    /* Generous gutters once there's room for them — the mobile 1rem
+       minimum stays too tight for the "floating sheet" feel the drop
+       shadow and dark margins are going for. */
+    --frame-width: min(calc(100% - 6rem), var(--content-width));
+  }
+  .header-frame {
+    margin: 1.75rem auto 0.5rem;
+  }
+  .content-frame {
+    margin-top: 0.5rem;
+  }
   .container {
     padding-left: 2rem;
     padding-right: 2rem;
   }
   main {
-    padding: 1.75rem 0 5rem;
+    padding: 1.75rem 0 1.5rem;
   }
   .header-bar {
     gap: 1rem;

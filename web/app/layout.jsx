@@ -1,7 +1,6 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "./components/SiteHeader";
-import SiteFooter from "./components/SiteFooter";
 
 // Grotesk sans everywhere — headlines and body share the same family now,
 // just different weights, instead of a serif/sans pairing.
@@ -26,11 +25,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={inter.variable}>
       <body>
-        <div className="app-shell">
-          <SiteHeader />
-          <div className="scroll-region">{children}</div>
-          <SiteFooter />
-        </div>
+        <div className="bg-fixed" aria-hidden="true" />
+        <SiteHeader />
+        {children}
       </body>
     </html>
   );

@@ -1,3 +1,4 @@
+import ContentFrame from "./components/ContentFrame";
 import PageIntro from "./components/PageIntro";
 import Briefing from "./components/Briefing";
 import { getLatestBriefing } from "./lib/data";
@@ -31,19 +32,17 @@ export default async function Home() {
   );
 
   return (
-    <div className="content-frame">
-      <div className="content-frame-inner">
-        <PageIntro eyebrow="Your daily AI briefing" meta={meta} />
-        <main className="container">
-          {loadError && <p className="error">Couldn&apos;t load the briefing: {loadError}</p>}
+    <ContentFrame>
+      <PageIntro eyebrow="Your daily AI briefing" meta={meta} />
+      <main className="container">
+        {loadError && <p className="error">Couldn&apos;t load the briefing: {loadError}</p>}
 
-          {!loadError && entries.length === 0 && (
-            <p className="empty-state">No briefing yet — check back tomorrow morning.</p>
-          )}
+        {!loadError && entries.length === 0 && (
+          <p className="empty-state">No briefing yet — check back tomorrow morning.</p>
+        )}
 
-          {!loadError && entries.length > 0 && <Briefing entries={entries} />}
-        </main>
-      </div>
-    </div>
+        {!loadError && entries.length > 0 && <Briefing entries={entries} />}
+      </main>
+    </ContentFrame>
   );
 }

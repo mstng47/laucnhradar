@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ContentFrame from "../../components/ContentFrame";
 import PageIntro from "../../components/PageIntro";
 import Briefing from "../../components/Briefing";
 import { getEntriesForDate } from "../../lib/data";
@@ -34,25 +35,23 @@ export default async function ArchiveDate({ params }) {
   );
 
   return (
-    <div className="content-frame">
-      <div className="content-frame-inner">
-        <PageIntro eyebrow={formatDate(date, { weekday: "long" })} meta={meta} />
-        <main className="container">
-          <p className="back-row">
-            <Link href="/archive" className="back-link">
-              ← All briefings
-            </Link>
-          </p>
+    <ContentFrame>
+      <PageIntro eyebrow={formatDate(date, { weekday: "long" })} meta={meta} />
+      <main className="container">
+        <p className="back-row">
+          <Link href="/archive" className="back-link">
+            ← All briefings
+          </Link>
+        </p>
 
-          {loadError && <p className="error">Couldn&apos;t load this briefing: {loadError}</p>}
+        {loadError && <p className="error">Couldn&apos;t load this briefing: {loadError}</p>}
 
-          {!loadError && entries.length === 0 && (
-            <p className="empty-state">No briefing was saved for this date.</p>
-          )}
+        {!loadError && entries.length === 0 && (
+          <p className="empty-state">No briefing was saved for this date.</p>
+        )}
 
-          {!loadError && entries.length > 0 && <Briefing entries={entries} />}
-        </main>
-      </div>
-    </div>
+        {!loadError && entries.length > 0 && <Briefing entries={entries} />}
+      </main>
+    </ContentFrame>
   );
 }
