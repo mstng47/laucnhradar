@@ -105,7 +105,7 @@
      --font-masthead are kept as separate names (rather than deleted) so
      callers don't need to change, even though there's currently no
      typeface difference between any of the three. */
-  --font-body: var(--font-ibm-plex-mono), ui-monospace, "Cascadia Mono", "Cascadia Code",
+  --font-body: var(--font-victor-mono), ui-monospace, "Cascadia Mono", "Cascadia Code",
     "SFMono-Regular", Consolas, Menlo, monospace;
   --font-display: var(--font-body);
   --font-masthead: var(--font-body);
@@ -335,7 +335,7 @@ main {
   align-items: center;
   gap: 0.4rem;
   font-family: var(--font-body);
-  font-weight: 700; /* IBM Plex Mono tops out at 700 — see the note in layout.jsx */
+  font-weight: 700; /* Victor Mono tops out at 700 — see the note in layout.jsx */
   font-size: 1rem;
   color: var(--chrome-text);
   text-decoration: none;
@@ -406,7 +406,7 @@ main {
 .masthead-wordmark {
   margin: 0;
   font-family: var(--font-masthead);
-  font-weight: 700; /* IBM Plex Mono tops out at 700 — see the note in layout.jsx */
+  font-weight: 700; /* Victor Mono tops out at 700 — see the note in layout.jsx */
   font-size: 2rem;
   line-height: 1;
   color: var(--text);
@@ -486,7 +486,7 @@ main {
 .open-count {
   flex-shrink: 0;
   font-size: 2.5rem;
-  font-weight: 700; /* IBM Plex Mono tops out at 700 — see the note in layout.jsx */
+  font-weight: 700; /* Victor Mono tops out at 700 — see the note in layout.jsx */
   line-height: 1;
   color: var(--text);
   font-variant-numeric: tabular-nums;
