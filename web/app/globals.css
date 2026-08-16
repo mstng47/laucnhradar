@@ -873,6 +873,27 @@ main > section:first-child > .section-heading-light {
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* Stories added by the "load more" button (see BriefingList.jsx) —
+     StoryReveal's IntersectionObserver only scans .story elements that
+     exist when it mounts, so these get their own entrance instead of
+     waiting on .reveal-visible, which they'd never receive. Keyframes
+     rather than the transition above because this needs to animate the
+     instant the class is applied, not on a later toggle. */
+  .story-just-added {
+    animation: story-just-added-in 450ms ease forwards;
+  }
+
+  @keyframes story-just-added-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 .story-head {
@@ -1033,6 +1054,63 @@ main > section:first-child > .section-heading-light {
 .save-toggle:hover {
   color: var(--teal);
   transform: translateY(-1px);
+}
+
+/* ---------- Load more (see BriefingList.jsx) ---------- */
+
+.load-more-row {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-md) 0 var(--space-sm);
+}
+
+.load-more-toggle {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-soft);
+  background: none;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  padding: 0.65rem 1.15rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.load-more-toggle:hover:not(:disabled) {
+  color: var(--teal);
+  border-color: var(--teal);
+}
+
+.load-more-toggle:disabled {
+  cursor: default;
+}
+
+/* A terminal-style blinking cursor rather than a spinner or bouncing
+   dots — round loading indicators read as generic; a blinking block
+   character next to "Finding more stories" fits the monospace,
+   technical-newspaper register everything else here is built in. */
+.load-more-cursor {
+  display: inline-block;
+  margin-left: 0.15rem;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .load-more-cursor {
+    animation: load-more-blink 1s step-end infinite;
+  }
+}
+
+@keyframes load-more-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 /* ---------- Deep dive (expand-in-place) ---------- */

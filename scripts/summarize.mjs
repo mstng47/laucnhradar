@@ -24,7 +24,13 @@ const RECENT_COVERAGE_DAYS = 14;
 // on 2026-08-13 the model returned 12/10/6 against a 5/5/3 target (28
 // items, a claimed 6-minute read on a product meant for under two). These
 // caps are the actual backstop; see flattenSections.
-const SECTION_CAPS = { main: 5, launch: 5, also: 3 };
+//
+// main is 8, not 5: the website only shows the first 5 by default and
+// reveals items 6-8 behind a "load more" button (see BriefingList.jsx),
+// so the two-minute default read is unaffected — this cap just allows a
+// deeper pool to exist for whoever asks for it, on days that genuinely
+// have that much worth including.
+const SECTION_CAPS = { main: 8, launch: 5, also: 3 };
 
 async function loadReaderProfile() {
   const raw = await readFile(READER_PROFILE_PATH, "utf-8");
@@ -69,13 +75,22 @@ READER PROFILE:
 ${readerProfile}
 ${knownTermsSection}${recentCoverageSection}
 Organize your selections into three sections. These are hard maximums, not
-targets — this briefing is read in under two minutes before work, and every
-extra item past the limit makes that fail:
+targets — the site shows the first 5 "main" items and all of "launches"/
+"also" by default in under two minutes before work, and every extra item
+past these limits makes that fail:
 
-1. "main" — AT MOST 5 items, and normally 3-5. The most important AI
-   developments today, specifically relevant to this reader. Full detail.
-   Prefer things that change what they should know or do over things that
-   are merely interesting. NEVER return more than 5.
+1. "main" — AT MOST 8 items, and normally 3-5. The most important AI
+   developments today, specifically relevant to this reader. Full detail
+   for every item, not just the first few. Order matters: put your
+   single strongest item first, in descending order of importance — the
+   site shows only your first 5 by default, and items 6-8 only if the
+   reader explicitly asks for more, so a weak item buried at position 3
+   still costs the default read even if position 8 never gets seen.
+   Only go past 5 if there's genuinely a 6th, 7th or 8th story that
+   clears the same bar as the rest — never pad to reach 8, and never
+   hold back a strong 4th or 5th item just to save it for "more".
+   Prefer things that change what they should know or do over things
+   that are merely interesting. NEVER return more than 8.
 2. "launches" — AT MOST 5 items. Newly launched AI tools or products,
    primarily sourced from Product Hunt items in the list below (a genuine
    launch from another source counts too). ONE LINE each — just the product
