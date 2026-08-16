@@ -31,17 +31,19 @@ export default async function Home() {
   );
 
   return (
-    <>
-      <PageIntro eyebrow="Your daily AI briefing" meta={meta} />
-      <main className="container">
-        {loadError && <p className="error">Couldn&apos;t load the briefing: {loadError}</p>}
+    <div className="content-frame">
+      <div className="content-frame-inner">
+        <PageIntro eyebrow="Your daily AI briefing" meta={meta} />
+        <main className="container">
+          {loadError && <p className="error">Couldn&apos;t load the briefing: {loadError}</p>}
 
-        {!loadError && entries.length === 0 && (
-          <p className="empty-state">No briefing yet — check back tomorrow morning.</p>
-        )}
+          {!loadError && entries.length === 0 && (
+            <p className="empty-state">No briefing yet — check back tomorrow morning.</p>
+          )}
 
-        {!loadError && entries.length > 0 && <Briefing entries={entries} />}
-      </main>
-    </>
+          {!loadError && entries.length > 0 && <Briefing entries={entries} />}
+        </main>
+      </div>
+    </div>
   );
 }
