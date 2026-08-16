@@ -1,3 +1,4 @@
+import ContentFrame from "../components/ContentFrame";
 import PageIntro from "../components/PageIntro";
 
 export const metadata = {
@@ -9,13 +10,11 @@ export const metadata = {
 // channel being set up; content here is intentionally minimal until then.
 export default function Contact() {
   return (
-    <div className="content-frame">
-      <div className="content-frame-inner">
-        <PageIntro eyebrow="Contact" />
-        <main className="container">
-          <p className="stub-copy">Sift is a personal project without a public contact channel yet.</p>
-        </main>
-      </div>
-    </div>
+    <ContentFrame>
+      <PageIntro eyebrow="Contact" />
+      <main className="container">
+        <p className="stub-copy">Sift is a personal project without a public contact channel yet.</p>
+      </main>
+    </ContentFrame>
   );
 }
