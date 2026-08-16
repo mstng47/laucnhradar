@@ -255,9 +255,11 @@ function flattenSections(raw) {
   // Guard against an occasional malformed item (a missing field from the
   // model) reaching the database as a broken row instead of just being
   // dropped — headline and url are the two fields everything else (the
-  // link, the dedup list, the page itself) depends on.
+  // link, the dedup list, the page itself) depends on, and source is a
+  // not-null column in digest_entries, so a missing one fails the whole
+  // upsert batch rather than just that row.
   const flattened = [...main, ...launches, ...also];
-  const valid = flattened.filter((e) => e.headline && e.url);
+  const valid = flattened.filter((e) => e.headline && e.url && e.source);
   if (valid.length < flattened.length) {
     console.warn(`Dropped ${flattened.length - valid.length} malformed entry/entries from Claude's response.`);
   }
