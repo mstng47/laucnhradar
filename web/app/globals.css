@@ -30,6 +30,7 @@
   /* Every text colour here is checked against --bg for a 4.5:1 (WCAG AA)
      contrast ratio at minimum. */
   --text: #16171c; /* ~18.5:1 on --bg — headlines, links, body copy */
+  --text-rgb: 22, 23, 28; /* same colour, for the panel's own low-opacity dot-grid */
   --text-soft: #53565f; /* ~7.4:1 on --bg — secondary/supporting text */
   --text-faint: #9c988a; /* ~2.7:1 — decorative only (dots, dividers), never text */
 
@@ -217,12 +218,21 @@ main {
   filter: drop-shadow(0 24px 64px rgba(0, 0, 0, 0.45));
 }
 
-/* Solid — no texture inside the panel. It's clean paper; the texture
-   lives on the dark surface behind it (see .bg-fixed / "Background
-   texture" further up). */
 .content-frame-inner {
   background-color: var(--bg);
   clip-path: var(--frame-clip);
+}
+
+/* A second, faint dot-grid on the paper itself — separate from the
+   constellation mesh on the dark surface behind it (see .bg-fixed
+   further up), not a replacement for it. Desktop-only, same reasoning
+   as the rest of this site's small-screen-first approach: kept off
+   below 40rem so the phone view stays plain. */
+@media (min-width: 40rem) {
+  .content-frame-inner {
+    background-image: radial-gradient(circle, rgba(var(--text-rgb), 0.08) 1px, transparent 1.5px);
+    background-size: 20px 20px;
+  }
 }
 
 /* ---------- Nav header ---------- */
