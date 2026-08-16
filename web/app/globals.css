@@ -78,6 +78,10 @@
      change, but it now points at the same family instead of a serif. */
   --font-body: var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-display: var(--font-body);
+
+  /* The one deliberate exception to "no serif" — the masthead nameplate
+     only (see the note in Masthead.jsx and layout.jsx). */
+  --font-masthead: var(--font-playfair), Georgia, "Times New Roman", serif;
 }
 
 * {
@@ -341,56 +345,66 @@ main {
 }
 
 /* ---------- Masthead ---------- */
-/* The one hero moment on every page — logo, name, one line on what Sift
-   is, today's date — before anything page-specific starts. Generous
-   padding on purpose: this is the "nice design of the company" beat, not
-   another row of dense stats, so it gets room to breathe that the old
-   single compressed line didn't have. */
+/* The one hero moment on every page, before anything page-specific
+   starts — sized and composed like an old broadsheet's nameplate, not a
+   modern app header: centred (everything else on this site is
+   left-aligned — the one deliberate exception, because virtually every
+   historic masthead is symmetric even over ragged body columns), a
+   serif nameplate at real size, a thick-then-thin double rule instead of
+   a single hairline, and nothing else — no logo icon, no stat row. A
+   handful of well-chosen elements at genuine scale, not a decorated one. */
 .masthead {
-  padding-top: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid var(--hairline);
-}
-
-.masthead-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-}
-
-.masthead-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
+  padding-top: 3rem;
+  padding-bottom: 2rem;
+  text-align: center;
 }
 
 .masthead-wordmark {
-  font-weight: 800;
-  font-size: 1.6rem;
+  margin: 0;
+  font-family: var(--font-masthead);
+  font-weight: 900;
+  font-size: 2.75rem;
+  line-height: 1;
   letter-spacing: -0.01em;
   color: var(--text);
+}
+
+.masthead-tagline {
+  margin: 1rem auto 0;
+  max-width: 40ch;
+  font-family: var(--font-masthead);
+  font-style: italic;
+  font-weight: 700;
+  color: var(--text-soft);
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+/* The double rule: a thick line, a small gap, then a thin one — the one
+   recurring device in old newspaper mastheads for separating the
+   nameplate from the dateline beneath it. */
+.masthead-rule-thick {
+  height: 3px;
+  margin-top: 1.75rem;
+  background: var(--text);
+}
+
+.masthead-rule-thin {
+  height: 1px;
+  margin-top: 4px;
+  background: var(--text);
 }
 
 /* font-variant-caps, not text-transform: uppercase — the markup keeps
    normal casing so the browser can render true small-caps glyphs instead
    of just full-height capitals. */
 .masthead-date {
+  margin: 0.9rem 0 0;
   font-size: 0.85rem;
   color: var(--text-soft);
   font-variant-caps: small-caps;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-.masthead-tagline {
-  margin: 0.85rem 0 0;
-  max-width: 46ch;
-  color: var(--text-soft);
-  font-size: 1rem;
-  line-height: 1.6;
+  letter-spacing: 0.04em;
 }
 
 /* ---------- Page intro (eyebrow + meta, per page) ---------- */
@@ -914,14 +928,14 @@ main > section:first-child > .section-heading-light {
     margin-top: 0.5rem;
   }
   .masthead {
-    padding-top: 2.5rem;
-    padding-bottom: 1.75rem;
+    padding-top: 4.5rem;
+    padding-bottom: 2.75rem;
   }
   .masthead-wordmark {
-    font-size: 1.9rem;
+    font-size: 4.5rem;
   }
   .masthead-tagline {
-    font-size: 1.05rem;
+    font-size: 1.2rem;
   }
   .container {
     padding-left: 2rem;
