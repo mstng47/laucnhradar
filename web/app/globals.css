@@ -126,13 +126,14 @@ body {
 }
 
 /* Background texture: a faint constellation — nodes connected by thin
-   lines, plus a few scattered unconnected dots — tiled across the fixed
-   dark layer. Baked as a small inline SVG (data URI, base64 so the
-   markup's own quotes/commas can't be mistaken for CSS syntax) rather
-   than a raster file: a few KB of vector shapes, not an image asset.
-   Colour is baked into the SVG (a desaturated teal, --chrome-teal pulled
-   toward grey); the 8-12% visibility target comes from this layer's own
-   opacity below, not the SVG, so it can be tuned without re-encoding it.
+   lines, plus a few scattered unconnected dots, and a handful of larger
+   soft-glow "accent stars" for depth — tiled across the fixed dark
+   layer. Baked as a small inline SVG (data URI, base64 so the markup's
+   own quotes/commas can't be mistaken for CSS syntax) rather than a
+   raster file: a few KB of vector shapes, not an image asset. Colour is
+   baked into the SVG (a desaturated teal, --chrome-teal pulled toward
+   grey); overall visibility comes from this layer's own opacity below,
+   not the SVG, so it can be tuned without re-encoding it.
 
    Two masks, composited with `intersect` (visible only where both are
    opaque): one hides the texture behind the centre column where the
@@ -144,10 +145,10 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSczMDAnIGhlaWdodD0nMzAwJz48ZyBmaWxsPSdub25lJyBzdHJva2U9J3JnYig5MCwxNTAsMTU3KScgc3Ryb2tlLXdpZHRoPScxJz48bGluZSB4MT0nNDAnIHkxPSc2MCcgeDI9JzEyMCcgeTI9JzQwJy8+PGxpbmUgeDE9JzEyMCcgeTE9JzQwJyB4Mj0nMjAwJyB5Mj0nOTAnLz48bGluZSB4MT0nMjAwJyB5MT0nOTAnIHgyPScyNjAnIHkyPSc1MCcvPjxsaW5lIHgxPSc3MCcgeTE9JzE1MCcgeDI9JzEyMCcgeTI9JzQwJy8+PGxpbmUgeDE9JzcwJyB5MT0nMTUwJyB4Mj0nMTgwJyB5Mj0nMTYwJy8+PGxpbmUgeDE9JzE4MCcgeTE9JzE2MCcgeDI9JzI0MCcgeTI9JzE5MCcvPjxsaW5lIHgxPScyNDAnIHkxPScxOTAnIHgyPScyNzAnIHkyPScyNzAnLz48bGluZSB4MT0nMzAnIHkxPScyMzAnIHgyPSc3MCcgeTI9JzE1MCcvPjxsaW5lIHgxPScxNTAnIHkxPScyNjAnIHgyPScxODAnIHkyPScxNjAnLz48bGluZSB4MT0nMzAnIHkxPScyMzAnIHgyPScxNTAnIHkyPScyNjAnLz48L2c+PGcgZmlsbD0ncmdiKDkwLDE1MCwxNTcpJz48Y2lyY2xlIGN4PSc0MCcgY3k9JzYwJyByPScyJy8+PGNpcmNsZSBjeD0nMTIwJyBjeT0nNDAnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzIwMCcgY3k9JzkwJyByPScyJy8+PGNpcmNsZSBjeD0nMjYwJyBjeT0nNTAnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzcwJyBjeT0nMTUwJyByPScyLjInLz48Y2lyY2xlIGN4PScxODAnIGN5PScxNjAnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzI0MCcgY3k9JzE5MCcgcj0nMicvPjxjaXJjbGUgY3g9JzMwJyBjeT0nMjMwJyByPScxLjYnLz48Y2lyY2xlIGN4PScxNTAnIGN5PScyNjAnIHI9JzInLz48Y2lyY2xlIGN4PScyNzAnIGN5PScyNzAnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzEwMCcgY3k9JzIyMCcgcj0nMS4yJy8+PGNpcmNsZSBjeD0nMjIwJyBjeT0nMzAnIHI9JzEuMicvPjxjaXJjbGUgY3g9JzEwJyBjeT0nMTAwJyByPScxLjInLz48Y2lyY2xlIGN4PScyOTAnIGN5PScxNTAnIHI9JzEuMicvPjxjaXJjbGUgY3g9JzE2MCcgY3k9JzkwJyByPScxLjInLz48L2c+PC9zdmc+");
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSczODAnIGhlaWdodD0nMzgwJz48ZyBmaWxsPSdub25lJyBzdHJva2U9J3JnYig5MCwxNTAsMTU3KScgc3Ryb2tlLXdpZHRoPScxJz48bGluZSB4MT0nMzAnIHkxPSc1MCcgeDI9Jzk1JyB5Mj0nMzAnLz48bGluZSB4MT0nOTUnIHkxPSczMCcgeDI9JzE2MCcgeTI9JzU1Jy8+PGxpbmUgeDE9JzE2MCcgeTE9JzU1JyB4Mj0nMjMwJyB5Mj0nMzUnLz48bGluZSB4MT0nMjMwJyB5MT0nMzUnIHgyPSczMDAnIHkyPSc2MCcvPjxsaW5lIHgxPSczMDAnIHkxPSc2MCcgeDI9JzM1MCcgeTI9JzQwJy8+PGxpbmUgeDE9JzIwJyB5MT0nMTQwJyB4Mj0nODUnIHkyPScxMjAnLz48bGluZSB4MT0nODUnIHkxPScxMjAnIHgyPScxNTAnIHkyPScxNTAnLz48bGluZSB4MT0nMTUwJyB5MT0nMTUwJyB4Mj0nMjIwJyB5Mj0nMTMwJy8+PGxpbmUgeDE9JzIyMCcgeTE9JzEzMCcgeDI9JzI5MCcgeTI9JzE1NScvPjxsaW5lIHgxPScyOTAnIHkxPScxNTUnIHgyPSczNTAnIHkyPScxMzUnLz48bGluZSB4MT0nOTUnIHkxPSczMCcgeDI9Jzg1JyB5Mj0nMTIwJy8+PGxpbmUgeDE9JzIzMCcgeTE9JzM1JyB4Mj0nMjIwJyB5Mj0nMTMwJy8+PGxpbmUgeDE9JzE1JyB5MT0nMjMwJyB4Mj0nODAnIHkyPScyMTUnLz48bGluZSB4MT0nODAnIHkxPScyMTUnIHgyPScxNDUnIHkyPScyNDUnLz48bGluZSB4MT0nMTQ1JyB5MT0nMjQ1JyB4Mj0nMjEwJyB5Mj0nMjIwJy8+PGxpbmUgeDE9JzIxMCcgeTE9JzIyMCcgeDI9JzI4MCcgeTI9JzI1MCcvPjxsaW5lIHgxPScyODAnIHkxPScyNTAnIHgyPSczNDUnIHkyPScyMjUnLz48bGluZSB4MT0nODUnIHkxPScxMjAnIHgyPSc4MCcgeTI9JzIxNScvPjxsaW5lIHgxPScyMjAnIHkxPScxMzAnIHgyPScyMTAnIHkyPScyMjAnLz48bGluZSB4MT0nNDAnIHkxPSczMjAnIHgyPScxMTAnIHkyPSczMDAnLz48bGluZSB4MT0nMTEwJyB5MT0nMzAwJyB4Mj0nMTc1JyB5Mj0nMzMwJy8+PGxpbmUgeDE9JzE3NScgeTE9JzMzMCcgeDI9JzI0NScgeTI9JzMxMCcvPjxsaW5lIHgxPScyNDUnIHkxPSczMTAnIHgyPSczMTAnIHkyPSczMzUnLz48bGluZSB4MT0nMzEwJyB5MT0nMzM1JyB4Mj0nMzYwJyB5Mj0nMzE1Jy8+PGxpbmUgeDE9JzgwJyB5MT0nMjE1JyB4Mj0nMTEwJyB5Mj0nMzAwJy8+PGxpbmUgeDE9JzIxMCcgeTE9JzIyMCcgeDI9JzI0NScgeTI9JzMxMCcvPjwvZz48ZyBmaWxsPSdyZ2IoOTAsMTUwLDE1NyknIG9wYWNpdHk9JzAuMzUnPjxjaXJjbGUgY3g9JzE2MCcgY3k9JzU1JyByPSc2Jy8+PGNpcmNsZSBjeD0nMjIwJyBjeT0nMTMwJyByPSc2Jy8+PGNpcmNsZSBjeD0nMTQ1JyBjeT0nMjQ1JyByPSc2Jy8+PGNpcmNsZSBjeD0nMjQ1JyBjeT0nMzEwJyByPSc2Jy8+PC9nPjxnIGZpbGw9J3JnYig5MCwxNTAsMTU3KSc+PGNpcmNsZSBjeD0nMzAnIGN5PSc1MCcgcj0nMS44Jy8+PGNpcmNsZSBjeD0nOTUnIGN5PSczMCcgcj0nMS42Jy8+PGNpcmNsZSBjeD0nMTYwJyBjeT0nNTUnIHI9JzIuMicvPjxjaXJjbGUgY3g9JzIzMCcgY3k9JzM1JyByPScxLjYnLz48Y2lyY2xlIGN4PSczMDAnIGN5PSc2MCcgcj0nMS44Jy8+PGNpcmNsZSBjeD0nMzUwJyBjeT0nNDAnIHI9JzEuNCcvPjxjaXJjbGUgY3g9JzIwJyBjeT0nMTQwJyByPScxLjYnLz48Y2lyY2xlIGN4PSc4NScgY3k9JzEyMCcgcj0nMicvPjxjaXJjbGUgY3g9JzE1MCcgY3k9JzE1MCcgcj0nMS42Jy8+PGNpcmNsZSBjeD0nMjIwJyBjeT0nMTMwJyByPScyLjInLz48Y2lyY2xlIGN4PScyOTAnIGN5PScxNTUnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzM1MCcgY3k9JzEzNScgcj0nMS44Jy8+PGNpcmNsZSBjeD0nMTUnIGN5PScyMzAnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzgwJyBjeT0nMjE1JyByPScyJy8+PGNpcmNsZSBjeD0nMTQ1JyBjeT0nMjQ1JyByPScyLjInLz48Y2lyY2xlIGN4PScyMTAnIGN5PScyMjAnIHI9JzEuNicvPjxjaXJjbGUgY3g9JzI4MCcgY3k9JzI1MCcgcj0nMS44Jy8+PGNpcmNsZSBjeD0nMzQ1JyBjeT0nMjI1JyByPScxLjQnLz48Y2lyY2xlIGN4PSc0MCcgY3k9JzMyMCcgcj0nMS42Jy8+PGNpcmNsZSBjeD0nMTEwJyBjeT0nMzAwJyByPScyJy8+PGNpcmNsZSBjeD0nMTc1JyBjeT0nMzMwJyByPScxLjYnLz48Y2lyY2xlIGN4PScyNDUnIGN5PSczMTAnIHI9JzIuMicvPjxjaXJjbGUgY3g9JzMxMCcgY3k9JzMzNScgcj0nMS42Jy8+PGNpcmNsZSBjeD0nMzYwJyBjeT0nMzE1JyByPScxLjQnLz48L2c+PGcgZmlsbD0ncmdiKDkwLDE1MCwxNTcpJyBvcGFjaXR5PScwLjcnPjxjaXJjbGUgY3g9JzE4MCcgY3k9JzEwJyByPScxJy8+PGNpcmNsZSBjeD0nNScgY3k9JzE4MCcgcj0nMScvPjxjaXJjbGUgY3g9JzM3NScgY3k9JzE4MCcgcj0nMScvPjxjaXJjbGUgY3g9JzYwJyBjeT0nMzcwJyByPScxJy8+PGNpcmNsZSBjeD0nMzMwJyBjeT0nMTAnIHI9JzEnLz48Y2lyY2xlIGN4PScxMCcgY3k9JzEwJyByPScxJy8+PGNpcmNsZSBjeD0nMzcwJyBjeT0nMzcwJyByPScxJy8+PGNpcmNsZSBjeD0nMjAwJyBjeT0nMzc1JyByPScxJy8+PC9nPjwvc3ZnPg==");
   background-repeat: repeat;
-  background-size: 300px 300px;
-  opacity: 0.1;
+  background-size: 380px 380px;
+  opacity: 0.13;
   mask-image:
     linear-gradient(
       to right,
@@ -347,16 +348,28 @@ main {
 /* ---------- Masthead ---------- */
 /* The one hero moment on every page, before anything page-specific
    starts — sized and composed like an old broadsheet's nameplate, not a
-   modern app header: centred (everything else on this site is
-   left-aligned — the one deliberate exception, because virtually every
-   historic masthead is symmetric even over ragged body columns), a
-   serif nameplate at real size, a thick-then-thin double rule instead of
-   a single hairline, and nothing else — no logo icon, no stat row. A
-   handful of well-chosen elements at genuine scale, not a decorated one. */
+   modern app header: a serif nameplate at real size, a thick-then-thin
+   double rule instead of a single hairline. Logo left, nameplate beside
+   it, tagline + date right — the one layout on this site that splits
+   left/right rather than stacking, so the logo mark earns its place
+   back here specifically to anchor that left side. */
 .masthead {
   padding-top: 3rem;
   padding-bottom: 2rem;
-  text-align: center;
+}
+
+.masthead-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem 2rem;
+}
+
+.masthead-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
 }
 
 .masthead-wordmark {
@@ -369,15 +382,40 @@ main {
   color: var(--text);
 }
 
+.masthead-writing {
+  max-width: 34ch;
+  /* Right-aligned to sit flush with the rule/panel edge on its side —
+     overridden to left on narrow screens, where a right-aligned
+     paragraph that's wrapped to several lines gets hard to read. */
+  text-align: right;
+}
+
+@media (max-width: 33.9375rem) {
+  .masthead-writing {
+    text-align: left;
+  }
+}
+
 .masthead-tagline {
-  margin: 1rem auto 0;
-  max-width: 40ch;
+  margin: 0;
   font-family: var(--font-masthead);
   font-style: italic;
   font-weight: 700;
   color: var(--text-soft);
-  font-size: 1.05rem;
-  line-height: 1.5;
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+/* font-variant-caps, not text-transform: uppercase — the markup keeps
+   normal casing so the browser can render true small-caps glyphs instead
+   of just full-height capitals. */
+.masthead-date {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  font-variant-caps: small-caps;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
 }
 
 /* The double rule: a thick line, a small gap, then a thin one — the one
@@ -393,18 +431,6 @@ main {
   height: 1px;
   margin-top: 4px;
   background: var(--text);
-}
-
-/* font-variant-caps, not text-transform: uppercase — the markup keeps
-   normal casing so the browser can render true small-caps glyphs instead
-   of just full-height capitals. */
-.masthead-date {
-  margin: 0.9rem 0 0;
-  font-size: 0.85rem;
-  color: var(--text-soft);
-  font-variant-caps: small-caps;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
 }
 
 /* ---------- Page intro (eyebrow + meta, per page) ---------- */

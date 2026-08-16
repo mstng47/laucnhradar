@@ -23,7 +23,7 @@ const playfair = Playfair_Display({
 
 export const metadata = {
   title: "Sift",
-  description: "Your daily AI briefing",
+  description: "Your daily briefing, distilled to what matters",
 };
 
 // Read on a phone, so scale to the device width and allow zooming.
