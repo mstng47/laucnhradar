@@ -46,7 +46,11 @@ export default function DeepDive({ text }) {
       >
         {open ? "Show less" : "Read the deep dive"}
       </button>
-      {open && <div className="deep-dive-content">{renderDeepDiveText(text)}</div>}
+      {open && (
+        <div className="deep-dive-content">
+          <div className="deep-dive-content-inner">{renderDeepDiveText(text)}</div>
+        </div>
+      )}
     </div>
   );
 }

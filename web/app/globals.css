@@ -8,39 +8,69 @@
    dashboard — no card panels, no third "alert" colour. */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* Surfaces: deep ink navy, not pure black. --surface is only used for
-     actual raised UI (the sticky header, form inputs) — never as a panel
-     behind reading content. */
-  --bg: #0b1220;
-  --surface: #121b2c;
-  --hairline: #24314a;
+  /* Chrome: the header and footer only — dark navy, fixed, never used for
+     reading content. Kept as its own namespace (rather than swapping
+     meaning based on where you are on the page) so a component's colour
+     never depends on which parent happens to render it. */
+  --chrome-bg: #0b1220;
+  --chrome-hairline: #24314a;
+  --chrome-text: #f8f4ec; /* ~17:1 on --chrome-bg */
+  --chrome-text-soft: #b7bfd0; /* ~10.1:1 on --chrome-bg */
+  --chrome-teal: #34c9d9; /* ~9.4:1 on --chrome-bg */
 
-  /* Text: near-white for anything meant to be read, a legible secondary
-     grey for supporting text, and a genuinely dim tone reserved for
-     decorative separators only (never real words) — see the contrast
-     notes on each rule below. Every text colour here is checked against
-     --bg for a 4.5:1 (WCAG AA) contrast ratio at minimum. */
-  --text: #f8f4ec; /* ~17:1 on --bg — headlines, links, body copy */
-  --text-soft: #b7bfd0; /* ~10.1:1 on --bg — secondary/supporting text */
-  --text-faint: #66708a; /* ~3.8:1 — decorative only (dots, dividers), never text */
+  /* Content: everything else — black/near-black text on a light surface.
+     --surface is for raised UI within content (deep-dive panel, inputs). */
+  --bg: #faf8f3;
+  --surface: #ffffff;
+  --hairline: #ddd6c7;
 
-  /* Accents — pick exact shades here, used as both solid colour and,
-     via the *-rgb triplets, translucent tints for chips. */
-  --teal: #34c9d9; /* ~9.4:1 on --bg */
-  --teal-rgb: 52, 201, 217;
-  --violet: #b3a8de; /* ~8.5:1 on --bg — brightened from #a599d1 (~7.2:1) */
-  --violet-rgb: 179, 168, 222;
-  --error: #f2867d; /* ~7.6:1 on --bg */
-  --error-rgb: 242, 134, 125;
+  /* Every text colour here is checked against --bg for a 4.5:1 (WCAG AA)
+     contrast ratio at minimum. */
+  --text: #16171c; /* ~18.5:1 on --bg — headlines, links, body copy */
+  --text-rgb: 22, 23, 28; /* same colour, for the low-opacity dot-grid texture */
+  --text-soft: #53565f; /* ~7.4:1 on --bg — secondary/supporting text */
+  --text-faint: #9c988a; /* ~2.7:1 — decorative only (dots, dividers), never text */
+
+  /* Accents — darkened from the old dark-theme values so they still clear
+     4.5:1 against a light --bg instead of a dark one. Used as both solid
+     colour and, via the *-rgb triplets, translucent tints for chips. */
+  --teal: #0d7e88; /* ~4.9:1 on --bg */
+  --teal-rgb: 13, 126, 136;
+  --violet: #6a5cb5; /* ~5.3:1 on --bg */
+  --violet-rgb: 106, 92, 181;
+  --error: #b3392a; /* ~6.1:1 on --bg */
+  --error-rgb: 179, 57, 42;
+
+  /* Bullet-marker accent only (list squares) — decorative, not held to the
+     text contrast bar above. */
+  --marker: #e0451f;
+  --marker-rgb: 224, 69, 31;
 
   --content-width: 47.5rem; /* ~760px reading column, one shared width for
     the header, the intro block and the content below it */
   --content-half: calc(var(--content-width) / 2);
 
-  --font-body: var(--font-inter), system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: var(--font-lora), Georgia, "Times New Roman", serif;
+  /* Chamfered-corner frame: shared by every framed content block (see
+     "Framed content blocks" below) so the cut always reads as the same
+     die size everywhere it's used, not a one-off per component. Top
+     corners cut at 45°, bottom corners stay square. */
+  --chamfer: 0.9rem;
+  --frame-clip: polygon(
+    var(--chamfer) 0,
+    calc(100% - var(--chamfer)) 0,
+    100% var(--chamfer),
+    100% 100%,
+    0 100%,
+    0 var(--chamfer)
+  );
+
+  /* Grotesk sans for both headlines and body — --font-display kept as a
+     separate variable (rather than deleted) so callers don't need to
+     change, but it now points at the same family instead of a serif. */
+  --font-body: var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-display: var(--font-body);
 }
 
 * {
@@ -48,7 +78,21 @@
 }
 
 html {
-  background: var(--bg);
+  background: var(--chrome-bg);
+}
+
+/* Body is the dark canvas the light content sits on — not the reading
+   surface itself. Actual reading colour/background comes from --text/--bg
+   on the content elements below, which stay light.
+
+   height + overflow: hidden here (and on html) is what makes that canvas
+   genuinely static: the viewport itself never scrolls. Only
+   .scroll-region, the flex child between the fixed header and footer,
+   scrolls — see "App shell" below. */
+html,
+body {
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
@@ -57,90 +101,38 @@ body {
   /* 18px — raised from 17px for comfortable reading. */
   font-size: 18px;
   line-height: 1.7;
-  color: var(--text);
-  background: var(--bg);
+  color: var(--chrome-text);
+  background: var(--chrome-bg);
   -webkit-text-size-adjust: 100%;
 }
 
-/* ---------- Background texture ----------
-   Two fixed, full-viewport layers behind everything (z-index: -1,
-   pointer-events: none) — grain across the whole page, a dot grid in the
-   margins either side of the reading column. Both off below 900px.
-
-   Two earlier attempts at this appeared to do nothing. Checked carefully
-   this time for the most likely real cause — some wrapper painting a
-   solid, opaque background on top of these layers, which would hide them
-   completely regardless of what they contain. Audited every `background`
-   (not background-image) rule in this file plus every component's JSX:
-   only `body` and the sticky `.site-header` set a solid background, and
-   the header is a ~70px strip at the very top, not a full-page cover — it
-   can't explain a "completely flat" whole-page report. No such wrapper
-   exists. The actual cause was almost certainly the previous dot grid's
-   min-width gate (76rem / 1216px) simply being wider than the browser
-   window this was checked in, combined with grain subtle enough to not
-   register at a glance — both addressed directly below with the 900px
-   threshold and higher-contrast, higher-opacity values this round. */
-
-/* Grain: inline SVG feTurbulence data URI, tiled. base64-encoded (not
-   percent-encoded) so a data URI containing its own nested url(#n) filter
-   reference can't be mangled by the build's CSS handling. Raw turbulence
-   output clusters around mid-grey (no true black/white); the
-   feComponentTransfer block below stretches that to the full 0-255 range
-   so it reads as visible grain rather than a near-invisible ~5-unit
-   shift at low opacity. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: 0.1;
-  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNDAnIGhlaWdodD0nMTQwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC45JyBudW1PY3RhdmVzPScyJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PGZlQ29sb3JNYXRyaXggdHlwZT0nc2F0dXJhdGUnIHZhbHVlcz0nMCcvPjxmZUNvbXBvbmVudFRyYW5zZmVyPjxmZUZ1bmNSIHR5cGU9J2xpbmVhcicgc2xvcGU9JzQnIGludGVyY2VwdD0nLTEuNicvPjxmZUZ1bmNHIHR5cGU9J2xpbmVhcicgc2xvcGU9JzQnIGludGVyY2VwdD0nLTEuNicvPjxmZUZ1bmNCIHR5cGU9J2xpbmVhcicgc2xvcGU9JzQnIGludGVyY2VwdD0nLTEuNicvPjwvZmVDb21wb25lbnRUcmFuc2Zlcj48L2ZpbHRlcj48cmVjdCB3aWR0aD0nMTQwJyBoZWlnaHQ9JzE0MCcgZmlsdGVyPSd1cmwoI24pJy8+PC9zdmc+");
-  background-repeat: repeat;
-  display: none;
+/* ---------- App shell ----------
+   Header and footer are fixed-height flex children that never scroll;
+   .scroll-region is the one flex child that does, in its own scrolling
+   box. min-height: 0 overrides the flex default (which would otherwise
+   size this to its content and defeat the scroll) — needed for Firefox
+   in particular. dvh after vh: browsers that don't understand dvh just
+   keep the vh value; ones that do get the correct height on mobile
+   despite the browser chrome resizing the viewport as you scroll. */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
 }
 
-/* Dot grid: small light dots, margins only — masked out across the
-   reading column so it's never behind text. Started at 5% white opacity
-   per spec and raised to 14% (dot colour itself, not layer opacity) after
-   checking it read as barely-there at 5% against this background. */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  display: none;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.14) 1px, transparent 1.5px);
-  background-size: 22px 22px;
-  -webkit-mask-image: linear-gradient(
-    to right,
-    black 0,
-    black calc(50% - var(--content-half) - 2rem),
-    transparent calc(50% - var(--content-half)),
-    transparent calc(50% + var(--content-half)),
-    black calc(50% + var(--content-half) + 2rem),
-    black 100%
-  );
-  mask-image: linear-gradient(
-    to right,
-    black 0,
-    black calc(50% - var(--content-half) - 2rem),
-    transparent calc(50% - var(--content-half)),
-    transparent calc(50% + var(--content-half)),
-    black calc(50% + var(--content-half) + 2rem),
-    black 100%
-  );
+.scroll-region {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Both layers off below 900px — no margin to put the dot grid in there,
-   and this keeps the phone view (read every morning) completely plain. */
-@media (min-width: 56.25rem) {
-  body::before,
-  body::after {
-    display: block;
-  }
-}
+/* Background texture: the previous full-viewport grain + margin dot-grid
+   was built for an all-dark page with reading content masked out of it.
+   Now that content lives in light framed blocks on a dark canvas, the
+   dot grid moves inside those blocks instead (see "Framed content
+   blocks" below) — nothing needed at the body level any more. */
 
 a {
   color: inherit;
@@ -163,20 +155,68 @@ a {
 }
 
 main {
+  color: var(--text);
   padding: 1.5rem 0 4rem;
 }
 
-/* ---------- Sticky nav header ---------- */
+/* ---------- Framed content blocks ----------
+   The light "paper" the reading content sits on, as a bordered card
+   floating on the dark chrome canvas — not a full-bleed background.
+   Two nested elements because a plain `border` doesn't follow a
+   clip-path's cut edge: the outer layer is border-colour with a 1px
+   inset, the inner layer is content-colour clipped to the same shape, so
+   the 1px gap between them reads as a border that actually turns the
+   corner. */
+.content-frame {
+  width: min(calc(100% - 2rem), calc(var(--content-width) + 5rem));
+  margin: 0.75rem auto 2.5rem;
+  padding: 1px;
+  background: var(--hairline);
+  clip-path: var(--frame-clip);
+}
 
+.content-frame-inner {
+  background-color: var(--bg);
+  clip-path: var(--frame-clip);
+}
+
+/* Dot grid only above the width that gives it visible margin either side
+   of the text column — kept off on mobile so the page stays plain there,
+   same reasoning as the rest of this site's small-screen-first approach. */
+@media (min-width: 40rem) {
+  .content-frame-inner {
+    background-image: radial-gradient(circle, rgba(var(--text-rgb), 0.08) 1px, transparent 1.5px);
+    background-size: 20px 20px;
+  }
+}
+
+/* ---------- Nav header ---------- */
+
+/* A fixed flex child of .app-shell now (see "App shell" above), not a
+   sticky element — it never scrolls because .scroll-region is the only
+   thing that does. flex-shrink: 0 stops it being squashed if the content
+   below ever pushes for space. No background of its own: the dark body
+   shows through around the narrower frame below it. */
 .site-header {
-  position: sticky;
-  top: 0;
+  flex-shrink: 0;
+  position: relative;
   z-index: 10;
-  /* Solid, not translucent+blurred — backdrop-filter renders inconsistently
-     across browsers and was the likely source of a visible seam. A flat
-     colour that exactly matches the page background can never mismatch. */
-  background: var(--bg);
-  border-bottom: 1px solid var(--hairline);
+}
+
+/* Same width as .content-frame and the same border/clip-path pairing, so
+   the header reads as the top of one continuous framed shell rather than
+   a separate full-width bar. */
+.header-frame {
+  width: min(calc(100% - 2rem), calc(var(--content-width) + 5rem));
+  margin: 1rem auto;
+  padding: 1px;
+  background: var(--chrome-hairline);
+  clip-path: var(--frame-clip);
+}
+
+.header-frame-inner {
+  background: var(--chrome-bg);
+  clip-path: var(--frame-clip);
 }
 
 .header-bar {
@@ -201,7 +241,7 @@ main {
   font-weight: 800;
   font-size: 1rem;
   letter-spacing: -0.01em;
-  color: var(--text);
+  color: var(--chrome-text);
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
@@ -217,7 +257,7 @@ main {
 }
 
 .nav-link {
-  color: var(--text-soft);
+  color: var(--chrome-text-soft);
   text-decoration: none;
   font-size: 0.8rem;
   font-weight: 600;
@@ -227,11 +267,11 @@ main {
 }
 
 .nav-link:hover {
-  color: var(--text);
+  color: var(--chrome-text);
 }
 
 .nav-link.active {
-  color: var(--teal);
+  color: var(--chrome-teal);
 }
 
 /* ---------- Page intro (eyebrow + meta, per page) ---------- */
@@ -282,6 +322,17 @@ main {
 
 .back-link:hover {
   text-decoration: underline;
+}
+
+/* ---------- Stub pages (About, Contact) ---------- */
+
+.stub-copy {
+  max-width: 38rem;
+  margin: 0;
+  padding: 1.5rem 0 2rem;
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.7;
 }
 
 /* ---------- States ---------- */
@@ -556,15 +607,23 @@ main > section:first-child > .section-heading-light {
   color: var(--text);
 }
 
+/* Same border/clip-path pairing as .content-frame — a plain `border`
+   doesn't follow a clip-path's cut edge, so the border colour lives on
+   this outer layer and shows through the inner layer's 1px inset. */
 .deep-dive-content {
   margin-top: 1rem;
-  padding: 1.1rem 1.2rem;
-  border-radius: 0.5rem;
-  background: var(--surface);
-  border: 1px solid var(--hairline);
+  padding: 1px;
+  background: var(--hairline);
+  clip-path: var(--frame-clip);
 }
 
-.deep-dive-content p {
+.deep-dive-content-inner {
+  padding: 1.1rem 1.2rem;
+  background: var(--surface);
+  clip-path: var(--frame-clip);
+}
+
+.deep-dive-content-inner p {
   margin: 0.9rem 0 0;
   color: var(--text);
   font-weight: 500;
@@ -572,13 +631,14 @@ main > section:first-child > .section-heading-light {
   font-size: 1rem;
 }
 
-.deep-dive-content p:first-child {
+.deep-dive-content-inner p:first-child {
   margin-top: 0;
 }
 
 .deep-dive-list {
+  list-style: none;
   margin: 0.9rem 0 0;
-  padding-left: 1.2rem;
+  padding-left: 0;
   color: var(--text);
   font-weight: 500;
   line-height: 1.7;
@@ -589,8 +649,23 @@ main > section:first-child > .section-heading-light {
   margin-top: 0;
 }
 
+/* Small solid square instead of a round bullet, positioned by hand since
+   list-style is off above (::marker can't be sized/coloured reliably
+   across browsers). */
 .deep-dive-list li {
+  position: relative;
   margin: 0.3rem 0;
+  padding-left: 1.15rem;
+}
+
+.deep-dive-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 7px;
+  height: 7px;
+  background: var(--marker);
 }
 
 /* ---------- Archive ---------- */
@@ -637,8 +712,12 @@ main > section:first-child > .section-heading-light {
 
 /* ---------- Footer ---------- */
 
+/* Fixed flex child of .app-shell, same as .site-header — stays put while
+   .scroll-region scrolls above it. */
 .site-footer {
-  border-top: 1px solid var(--hairline);
+  flex-shrink: 0;
+  background: var(--chrome-bg);
+  border-top: 1px solid var(--chrome-hairline);
   padding: 1.75rem 0 2.5rem;
 }
 
@@ -650,7 +729,7 @@ main > section:first-child > .section-heading-light {
 
 .footer-about {
   margin: 0;
-  color: var(--text-soft);
+  color: var(--chrome-text-soft);
   font-size: 0.88rem;
   line-height: 1.6;
 }
@@ -661,7 +740,7 @@ main > section:first-child > .section-heading-light {
 }
 
 .footer-nav a {
-  color: var(--teal);
+  color: var(--chrome-teal);
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 600;
@@ -673,7 +752,7 @@ main > section:first-child > .section-heading-light {
 
 .footer-note {
   margin: 0;
-  color: var(--text-soft);
+  color: var(--chrome-text-soft);
   font-size: 0.8rem;
 }
 
