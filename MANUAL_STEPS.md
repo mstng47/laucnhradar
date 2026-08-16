@@ -116,10 +116,36 @@ failure — so it's worth doing this before pointing anyone at `/email`.
 1. Go to **https://supabase.com** and open your project.
 2. In the left sidebar, click **SQL Editor**.
 3. Click **New query**.
-4. Open `supabase/schema.sql` in this repo, copy the whole file (not just
-   the bottom bit — earlier statements are safe to re-run), paste it in.
+4. Copy just the lines below (not the whole `supabase/schema.sql` file —
+   older parts of that file predate a fix and aren't guaranteed safe to
+   re-run against a database that already has data in it) and paste them in.
 5. Click the green **Run** button. You should see **"Success. No rows
    returned"**.
+
+```sql
+create extension if not exists pgcrypto;
+
+create table if not exists email_subscribers (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  enabled boolean not null default true,
+  days smallint[] not null default '{1,2,3,4,5}',
+  send_time time not null default '07:30:00',
+  timezone text not null default 'UTC',
+  manage_token text not null unique default encode(gen_random_bytes(24), 'hex'),
+  last_sent_date date,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists email_subscribers_enabled_idx on email_subscribers (enabled);
+
+alter table email_subscribers enable row level security;
+```
+
+> Safe to run as many times as you like — every line either creates
+> something only if it's missing, or (the index/RLS lines) is a no-op if
+> already done.
 
 ### 2. Sign up for Resend and verify a sending domain
 

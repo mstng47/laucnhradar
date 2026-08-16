@@ -12,15 +12,19 @@ create table if not exists digest_entries (
 
 -- Schema changed from a generic dev digest (title/summary) to a
 -- personalized reader briefing (headline/what_happened/why_it_matters).
--- Existing rows predate this shape, so they're cleared rather than left
--- half-populated — there's no real reader history to preserve yet.
+-- That migration already ran, years ago — the columns below already
+-- exist in production. This block used to also `truncate table
+-- digest_entries` here (there was no real reader history worth keeping
+-- at the time it was written), which made re-running this whole file
+-- destructive despite the top-of-file comment claiming it was always
+-- safe. That line is gone now: every statement remaining here really is
+-- a no-op against a database that already has these columns.
 alter table digest_entries drop column if exists title;
 alter table digest_entries drop column if exists summary;
 alter table digest_entries add column if not exists headline text;
 alter table digest_entries add column if not exists what_happened text;
 alter table digest_entries add column if not exists why_it_matters text;
 alter table digest_entries add column if not exists new_terms jsonb;
-truncate table digest_entries;
 alter table digest_entries alter column headline set not null;
 alter table digest_entries alter column what_happened set not null;
 alter table digest_entries alter column why_it_matters set not null;
