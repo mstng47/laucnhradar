@@ -6,11 +6,13 @@ import { useEffect, useState } from "react";
 import Logo from "./Logo";
 
 // The header is what a reader sees every morning using the product, not
-// a marketing site's nav bar — it only needs the two things that's about:
-// today's briefing (the brand mark itself, linking home) and the archive
-// of past ones. About/Contact are marketing-site pages, not part of the
+// a marketing site's nav bar — it only needs what that's about: today's
+// briefing, the archive of past ones, and saved stories. Home is listed
+// explicitly alongside them rather than relying on the brand mark alone
+// to imply it. About/Contact are marketing-site pages, not part of the
 // daily habit, so they live in the footer (see SignOff) instead.
 const NAV = [
+  { href: "/", label: "Home" },
   { href: "/archive", label: "Archive" },
   { href: "/saved", label: "Saved" },
 ];

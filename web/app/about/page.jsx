@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ContentFrame from "../components/ContentFrame";
 import PageIntro from "../components/PageIntro";
 
@@ -16,7 +17,11 @@ export default function About() {
         <p className="stub-copy">
           Everything that moved in tech this morning. Nothing that didn&apos;t. Sift reads the
           day&apos;s coverage, cuts it down to what&apos;s actually worth your time, and lays it
-          out in plain English. Read this, skip the rest.
+          out in plain English. Read this, skip the rest. Prefer your inbox?{" "}
+          <Link href="/email" className="text-link">
+            Get Sift by email
+          </Link>{" "}
+          instead — pick your own days, time and timezone.
         </p>
         <p className="fine-print">
           Under the hood: an automated pipeline reads the day&apos;s coverage and writes each

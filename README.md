@@ -41,6 +41,24 @@ run-pipeline.mjs         → runs both steps in sequence
 check-sources.mjs        → checks every feed in sources.json still works (`npm run check-sources`)
 ```
 
+## Email delivery
+
+Readers can subscribe at `/email` on the website to get the daily briefing
+sent to their inbox instead of (or alongside) visiting the site, on
+whichever days, time and timezone they choose.
+
+```
+supabase/schema.sql       → email_subscribers table (email, days, send_time, timezone, ...)
+scripts/send-emails.mjs   → runs every 15 min via GitHub Actions, sends to whoever's due now
+scripts/lib/emailTemplate.mjs → the actual daily-briefing email HTML
+web/app/email/            → signup and manage-schedule page
+web/app/api/subscribe/    → creates/updates a subscriber, sends a confirmation email
+web/app/api/unsubscribe/  → one-click unsubscribe (also wired for RFC 8058)
+```
+
+See [MANUAL_STEPS.md](MANUAL_STEPS.md) for the one-time Resend/Supabase
+setup this needs before it can actually send mail.
+
 ## Glossary
 
 Terms the briefing explains are saved to the `glossary_terms` table. Each run
@@ -62,5 +80,4 @@ and publishable key.
 
 ## Next steps
 
-- Add Resend to send the briefing as an email
 - Add Stripe for the premium tier

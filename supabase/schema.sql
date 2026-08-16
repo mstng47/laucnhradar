@@ -91,3 +91,55 @@ create policy "Public read access"
   for select
   to anon, authenticated
   using (true);
+
+
+-- Email delivery: lets a reader get the daily briefing sent to their inbox
+-- on their own chosen days/time/timezone instead of (or alongside) visiting
+-- the site. One row per subscriber, keyed by email.
+
+-- gen_random_bytes() (used for manage_token below) lives in pgcrypto,
+-- unlike gen_random_uuid() which Postgres has had built in since v13 —
+-- Supabase usually ships pgcrypto enabled already, but this makes sure
+-- rather than assuming.
+create extension if not exists pgcrypto;
+
+create table if not exists email_subscribers (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique,
+  enabled boolean not null default true,
+  -- 0=Sunday..6=Saturday, matching JS Date#getDay() / Intl weekday math —
+  -- both send-emails.mjs (Node) and the preferences form (browser) compute
+  -- "today" this same way, so the two never disagree about which day it is.
+  days smallint[] not null default '{1,2,3,4,5}',
+  -- Local wall-clock time, deliberately not a UTC instant — paired with
+  -- timezone below so the delivery hour stays fixed to the reader's own
+  -- clock across DST changes, rather than drifting by an hour twice a year.
+  send_time time not null default '07:30:00',
+  -- IANA name (e.g. "Europe/London"), not a fixed UTC offset — needed to
+  -- resolve send_time to an actual instant, and to know which offset
+  -- applies on any given day of the year.
+  timezone text not null default 'UTC',
+  -- Identifies this subscriber in email links (manage/unsubscribe) without
+  -- requiring an account or password. Long and random enough to not be
+  -- guessable; never logged or displayed, only ever compared against.
+  manage_token text not null unique default encode(gen_random_bytes(24), 'hex'),
+  -- The digest_date most recently emailed to this subscriber. Prevents a
+  -- double send if a cron run overlaps the previous one or is re-run by
+  -- hand — "already sent today's issue" is a date comparison, not a
+  -- timestamp one, since the whole point is once per digest per subscriber.
+  last_sent_date date,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists email_subscribers_enabled_idx
+  on email_subscribers (enabled);
+
+-- This table holds email addresses and a bearer-token-equivalent
+-- (manage_token) — real PII, unlike the briefing content above. RLS is on
+-- with NO policies at all: not even a public SELECT. The pipeline's cron
+-- (send-emails.mjs) and the website's API routes (/api/subscribe,
+-- /api/unsubscribe) both use the service_role key, which bypasses RLS —
+-- the anon/publishable key the rest of the site reads with gets nothing
+-- from this table, which is the point.
+alter table email_subscribers enable row level security;

@@ -551,6 +551,18 @@ main {
   text-decoration: underline;
 }
 
+/* Same treatment as .back-link (teal, underline on hover), but inline —
+   no display/padding overrides — for a link sitting mid-sentence inside
+   a paragraph, like the "Get Sift by email" mention on About. */
+.text-link {
+  color: var(--teal);
+  text-decoration: none;
+}
+
+.text-link:hover {
+  text-decoration: underline;
+}
+
 /* ---------- Stub pages (About, Contact) ---------- */
 
 .stub-copy {
@@ -575,6 +587,165 @@ main {
   color: var(--text-soft);
   font-size: var(--text-xs);
   line-height: 1.6;
+}
+
+/* ---------- Email preferences form ----------
+   The one form on the site, so its own small set of primitives lives
+   here rather than borrowing from a chip/badge/toggle built for a
+   different job. Flat rectangles and hairline borders throughout, same
+   as everywhere else — no rounded pill inputs, no filled card wells. */
+
+.email-form {
+  max-width: 28rem;
+  padding-bottom: var(--space-xl);
+}
+
+.field-group {
+  margin-bottom: var(--space-md);
+}
+
+.field-label {
+  display: block;
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-soft);
+  margin-bottom: 0.45rem;
+}
+
+.field-input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  padding: 0.6rem 0.75rem;
+}
+
+.field-input:focus {
+  outline: 2px solid var(--teal);
+  outline-offset: 1px;
+  border-color: var(--teal);
+}
+
+.field-hint {
+  margin: 0.4rem 0 0;
+  font-size: var(--text-xs);
+  color: var(--text-soft);
+}
+
+.field-hint.is-error {
+  color: var(--error);
+}
+
+.field-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-md);
+  color: var(--text);
+}
+
+.day-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.day-toggle {
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  background: none;
+  padding: 0.5rem 0.7rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.day-toggle[aria-pressed="true"] {
+  color: var(--teal);
+  border-color: var(--teal);
+  background: rgba(var(--teal-rgb), 0.08);
+}
+
+.schedule-summary {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-md);
+  color: var(--text);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: var(--space-sm);
+}
+
+.btn-primary {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-md);
+  color: var(--bg);
+  background: var(--teal);
+  border: none;
+  border-radius: 2px;
+  padding: 0.7rem 1.25rem;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.85;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--text-soft);
+  background: none;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  padding: 0.65rem 1rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-secondary:hover {
+  color: var(--error);
+  border-color: var(--error);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.form-message {
+  margin-top: var(--space-sm);
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--teal);
+  font-size: var(--text-sm);
+  color: var(--text);
+}
+
+.form-message.is-error {
+  border-left-color: var(--error);
+  color: var(--error);
 }
 
 /* ---------- States ---------- */

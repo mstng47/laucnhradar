@@ -8,11 +8,10 @@ import Link from "next/link";
 export default function SignOff() {
   return (
     <footer className="sign-off container">
-      <p className="sign-off-about">
-        Everything that moved in tech this morning. Nothing that didn&apos;t.
-      </p>
+      <p className="sign-off-about">The five minutes that keep you current.</p>
       <nav className="sign-off-nav">
         <Link href="/archive">Archive</Link>
+        <Link href="/email">Get it by email</Link>
         <Link href="/about">About</Link>
         <Link href="/contact">Contact</Link>
       </nav>
