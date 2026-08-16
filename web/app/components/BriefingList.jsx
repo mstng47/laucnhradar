@@ -25,7 +25,7 @@ export default function BriefingList({ entries }) {
           <p className="story-summary">{entry.what_happened}</p>
 
           <div className="story-angle">
-            <span className="story-angle-label">Your angle</span>
+            <span className="story-angle-label">Why it matters</span>
             <p>{entry.why_it_matters}</p>
           </div>
 

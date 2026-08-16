@@ -23,6 +23,12 @@ export default async function Archive() {
 
   return (
     <ContentFrame>
+      <p className="back-row container">
+        <Link href="/" className="back-link">
+          ← Today&apos;s briefing
+        </Link>
+      </p>
+
       <PageIntro eyebrow="Every past briefing, by date" />
       <main className="container">
         {loadError && <p className="error">Couldn&apos;t load the archive: {loadError}</p>}

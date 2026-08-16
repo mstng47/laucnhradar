@@ -9,7 +9,7 @@ export default function SignOff() {
   return (
     <footer className="sign-off container">
       <p className="sign-off-about">
-        Sift is an automated daily briefing, personalized for one reader.
+        Five minutes a day. Everything that moved, and why it matters to you.
       </p>
       <nav className="sign-off-nav">
         <Link href="/archive">Archive</Link>
