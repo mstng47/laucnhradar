@@ -10,7 +10,10 @@ import Logo from "./Logo";
 // today's briefing (the brand mark itself, linking home) and the archive
 // of past ones. About/Contact are marketing-site pages, not part of the
 // daily habit, so they live in the footer (see SignOff) instead.
-const NAV = [{ href: "/archive", label: "Archive" }];
+const NAV = [
+  { href: "/archive", label: "Archive" },
+  { href: "/saved", label: "Saved" },
+];
 
 export default function SiteHeader() {
   const pathname = usePathname();

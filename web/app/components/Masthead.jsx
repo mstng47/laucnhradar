@@ -29,7 +29,7 @@ export default function Masthead() {
           <h1 className="masthead-wordmark">Sift</h1>
         </div>
         <p className="masthead-meta">
-          <span className="masthead-tagline">Selected for you</span>
+          <span className="masthead-tagline">Personal briefing</span>
           <span className="meta-dot">·</span>
           <span className="masthead-date">{todayFormatted()}</span>
         </p>

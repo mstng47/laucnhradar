@@ -9,7 +9,7 @@ export default function SignOff() {
   return (
     <footer className="sign-off container">
       <p className="sign-off-about">
-        Five minutes a day. Everything that moved, and why it matters to you.
+        Everything that moved in tech this morning. Nothing that didn&apos;t.
       </p>
       <nav className="sign-off-nav">
         <Link href="/archive">Archive</Link>

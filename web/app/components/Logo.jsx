@@ -1,21 +1,28 @@
-// Three bars narrowing to one signal — the same "many things down to a
-// few" idea as before, but as bold flat shapes with no enclosing square.
-// The old mark (a rounded-square frame around thin stroked bars) reads as
-// a generic app-icon template at a glance; dropping the frame and using
-// solid fills instead of 1.6px strokes is what actually fixes that, since
-// it's the frame + thin-stroke combination that reads as "placeholder
-// icon", not the bar idea itself.
+// A bracket pair holding a single dot — [ • ] — one signal pulled out of
+// noise, read literally rather than metaphorically. Replaces the earlier
+// narrowing-bar-stack mark: that one worked, but it's the single most
+// common shorthand for "filtering" in app icons generally, so next to a
+// technical-newspaper wordmark it read as generic. Brackets are a
+// character every reader of this site already recognises from code and
+// citations, which fits the register better than another funnel/filter
+// glyph would.
 //
-// Two other directions were considered and dropped: a funnel drawn as two
-// converging diagonal lines, and stacked chevrons pointing down. Both rely
-// on thin diagonal strokes, which blur or vanish once this is scaled down
-// to a 16px favicon; flat horizontal bars stay crisp at any size because
-// they're solid rectangles, not lines.
+// Two other directions were built and set aside: the narrowing bar stack
+// (the previous mark, evolved further), and a dot grid with one dot
+// dropped below the line. Both are solid marks on their own; brackets won
+// on legibility at 24px specifically — three shapes read faster than a
+// six-plus-dot grid at that size, and the mark doesn't already exist
+// on every other product's icon the way stacked bars do.
 //
-// Bars in --text-soft (quiet, secondary to the wordmark beside it); the
-// bottom dot in --teal — the same "circle = the signal" convention the
-// site's accent already carries everywhere else (the story index, "Your
-// angle"), so the mark and the rest of the interface read as one system.
+// Built from solid rectangles, not stroked paths, for the same reason the
+// old mark was: thin strokes blur or vanish once this scales down to a
+// 16px favicon, flat fills stay crisp at any size. Brackets in
+// --text-soft (quiet, secondary to the wordmark beside it); the dot in
+// --teal — the same "circle = the signal" convention the site's accent
+// already carries everywhere else (the story index, "Why it matters"),
+// so the mark and the rest of the interface read as one system. Still
+// legible as a single flat shape if forced to one color: three even
+// weight forms, no reliance on the two-tone split to read as [ • ].
 export default function Logo({ size = 22 }) {
   return (
     <svg
@@ -26,10 +33,13 @@ export default function Logo({ size = 22 }) {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <rect x="4" y="3.6" width="16" height="2.6" fill="var(--text-soft)" />
-      <rect x="6.75" y="8.6" width="10.5" height="2.6" fill="var(--text-soft)" />
-      <rect x="9.25" y="13.6" width="5.5" height="2.4" fill="var(--text-soft)" />
-      <circle cx="12" cy="19.3" r="2.15" fill="var(--teal)" />
+      <rect x="3" y="4" width="6" height="2.6" fill="var(--text-soft)" />
+      <rect x="3" y="17.4" width="6" height="2.6" fill="var(--text-soft)" />
+      <rect x="3" y="4" width="2.6" height="16" fill="var(--text-soft)" />
+      <rect x="15" y="4" width="6" height="2.6" fill="var(--text-soft)" />
+      <rect x="15" y="17.4" width="6" height="2.6" fill="var(--text-soft)" />
+      <rect x="18.4" y="4" width="2.6" height="16" fill="var(--text-soft)" />
+      <circle cx="12" cy="12" r="2.6" fill="var(--teal)" />
     </svg>
   );
 }

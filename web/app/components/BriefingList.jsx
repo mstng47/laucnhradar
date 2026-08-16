@@ -1,4 +1,5 @@
 import DeepDive from "./DeepDive";
+import SaveButton from "./SaveButton";
 
 export default function BriefingList({ entries }) {
   const total = String(entries.length).padStart(2, "0");
@@ -53,6 +54,13 @@ export default function BriefingList({ entries }) {
                 ↗
               </span>
             </a>
+            <SaveButton
+              id={entry.id}
+              headline={entry.headline}
+              url={entry.url}
+              source={entry.source}
+              digestDate={entry.digest_date}
+            />
             <DeepDive text={entry.deep_dive} />
           </div>
         </li>

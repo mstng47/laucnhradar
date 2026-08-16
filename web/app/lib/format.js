@@ -35,20 +35,4 @@ function groupSections(entries) {
   };
 }
 
-// New terms are attached per-item (usually only "main" items have any),
-// deduped by term across the whole day for the sidebar's "Terms explained
-// today" recap — the standalone glossary page is gone, so this is now the
-// only place to see a definition without opening the item that used it.
-function collectTermsToday(entries) {
-  const seen = new Map();
-  for (const entry of entries) {
-    for (const term of entry.new_terms ?? []) {
-      if (!term?.term || !term?.definition) continue;
-      const key = term.term.trim().toLowerCase();
-      if (!seen.has(key)) seen.set(key, term);
-    }
-  }
-  return [...seen.values()];
-}
-
-export { formatDate, estimateReadingMinutes, groupSections, collectTermsToday };
+export { formatDate, estimateReadingMinutes, groupSections };

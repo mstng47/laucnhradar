@@ -105,7 +105,7 @@
      --font-masthead are kept as separate names (rather than deleted) so
      callers don't need to change, even though there's currently no
      typeface difference between any of the three. */
-  --font-body: var(--font-jetbrains-mono), ui-monospace, "Cascadia Mono", "Cascadia Code",
+  --font-body: var(--font-ibm-plex-mono), ui-monospace, "Cascadia Mono", "Cascadia Code",
     "SFMono-Regular", Consolas, Menlo, monospace;
   --font-display: var(--font-body);
   --font-masthead: var(--font-body);
@@ -335,7 +335,7 @@ main {
   align-items: center;
   gap: 0.4rem;
   font-family: var(--font-body);
-  font-weight: 800;
+  font-weight: 700; /* IBM Plex Mono tops out at 700 — see the note in layout.jsx */
   font-size: 1rem;
   color: var(--chrome-text);
   text-decoration: none;
@@ -406,7 +406,7 @@ main {
 .masthead-wordmark {
   margin: 0;
   font-family: var(--font-masthead);
-  font-weight: 800;
+  font-weight: 700; /* IBM Plex Mono tops out at 700 — see the note in layout.jsx */
   font-size: 2rem;
   line-height: 1;
   color: var(--text);
@@ -486,7 +486,7 @@ main {
 .open-count {
   flex-shrink: 0;
   font-size: 2.5rem;
-  font-weight: 800;
+  font-weight: 700; /* IBM Plex Mono tops out at 700 — see the note in layout.jsx */
   line-height: 1;
   color: var(--text);
   font-variant-numeric: tabular-nums;
@@ -669,52 +669,6 @@ main > section:first-child > .section-heading-light {
   line-height: 1.6;
 }
 
-/* ---------- Terms explained today ---------- */
-/* Its own small recurring pattern, distinct from the brief list above —
-   a flat tag naming the term, its definition beside (desktop) or below
-   (mobile) it. */
-
-.term-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.term-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  padding: var(--space-xs) 0;
-  border-top: 1px solid var(--hairline);
-}
-
-.term-list li:first-child {
-  border-top: none;
-  padding-top: 0;
-}
-
-.term-tag {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  border: 1px solid var(--hairline);
-  border-radius: 2px;
-  padding: 0.15rem 0.5rem;
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-soft);
-}
-
-.term-def {
-  margin: 0;
-  color: var(--text-soft);
-  font-size: var(--text-sm);
-  line-height: 1.6;
-}
-
 /* ---------- Story list ---------- */
 
 .story-list {
@@ -886,6 +840,30 @@ main > section:first-child > .section-heading-light {
   font-weight: 500;
 }
 
+/* Sits right after .story-source in the same row — that link's own
+   margin-left: auto already pushed the pair flush to the row's right
+   edge, so this just tags along beside it rather than needing its own
+   alignment rule. No border/background, quieter than .deep-dive-toggle:
+   this is a small habitual action (save for later), not a section
+   control. */
+.save-toggle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0.3rem;
+  margin: -0.3rem 0;
+  cursor: pointer;
+  color: var(--text-soft);
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.save-toggle:hover {
+  color: var(--teal);
+  transform: translateY(-1px);
+}
+
 /* ---------- Deep dive (expand-in-place) ---------- */
 /* Always starts its own line within .story-meta (flex-basis: 100%) so it
    reads as part of the same quiet metadata cluster rather than the large
@@ -1019,6 +997,77 @@ main > section:first-child > .section-heading-light {
   font-size: var(--text-sm);
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Saved ----------
+   Deliberately mirrors .archive-list/.archive-row/.archive-date above
+   line for line — /saved is meant to read as a sibling of Archive, not a
+   bolt-on feature with its own look. It can't reuse those classes
+   directly: an archive row is a single <Link>, but a saved row needs a
+   headline link *and* a separate remove button side by side, which can't
+   both live inside one <a>. */
+
+.saved-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.saved-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1.1rem 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.saved-list li:first-child .saved-row {
+  border-top: none;
+}
+
+.saved-row-main {
+  min-width: 0;
+}
+
+.saved-headline {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.saved-headline:hover {
+  color: var(--teal);
+  text-decoration: underline;
+}
+
+.saved-row-meta {
+  margin: 0.3rem 0 0;
+  color: var(--text-soft);
+  font-size: var(--text-sm);
+}
+
+.saved-remove {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  color: var(--text-soft);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.saved-remove:hover {
+  color: var(--error);
+  border-color: var(--error);
 }
 
 /* ---------- Sign-off ----------
