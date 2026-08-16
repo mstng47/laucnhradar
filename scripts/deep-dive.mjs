@@ -81,6 +81,11 @@ VOICE:
 - Written for an intelligent businessperson who is not technical.
 - Dense and efficient — every sentence carries information. No throat-
   clearing, no restating the headline, no "in today's fast-moving landscape".
+- No em dashes (—) anywhere. Use a comma, a colon, parentheses, or a separate
+  sentence instead.
+- No stock AI-newsletter phrasing — "worth watching", "worth keeping an eye
+  on", "remains to be seen", "time will tell", "stay tuned", or similar
+  filler. Say something specific to this story instead.
 - Clear and direct, short paragraphs. A short bulleted list is fine where the
   source has several genuinely distinct findings.
 - Explain any term a business reader might not know, naturally, in the
@@ -117,8 +122,10 @@ the summary you're given. If you don't know more than the summary already
 says, say less — never claim detail you don't actually have.
 
 VOICE: intelligent businessperson, not technical, plain English, dense and
-direct. End with one short line on what this means for someone working in
-identity and access management (IAM/SAM/IGA).
+direct. No em dashes (—); use a comma, colon, or separate sentence instead.
+No stock AI-newsletter phrasing ("worth watching", "remains to be seen",
+"stay tuned"). End with one short line on what this means for someone
+working in identity and access management (IAM/SAM/IGA).
 
 Respond with ONLY the text itself — no preamble, no JSON, no markdown headers.`;
 }

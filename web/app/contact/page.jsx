@@ -2,7 +2,7 @@ import ContentFrame from "../components/ContentFrame";
 import PageIntro from "../components/PageIntro";
 
 export const metadata = {
-  title: "Contact — Sift",
+  title: "Contact · Sift",
   description: "Contact",
 };
 

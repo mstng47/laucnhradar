@@ -1,8 +1,21 @@
-// Rounded square, three stacked bars like a sieve — the middle bar has a
-// gap with a small filled circle passing through it. Grey (--text-faint)
-// for the frame/bars, accent teal for the circle, so the mark reads the
-// same "circle = the thing being sifted" way the header/why-marker teal
-// already does elsewhere on the page.
+// Three bars narrowing to one signal — the same "many things down to a
+// few" idea as before, but as bold flat shapes with no enclosing square.
+// The old mark (a rounded-square frame around thin stroked bars) reads as
+// a generic app-icon template at a glance; dropping the frame and using
+// solid fills instead of 1.6px strokes is what actually fixes that, since
+// it's the frame + thin-stroke combination that reads as "placeholder
+// icon", not the bar idea itself.
+//
+// Two other directions were considered and dropped: a funnel drawn as two
+// converging diagonal lines, and stacked chevrons pointing down. Both rely
+// on thin diagonal strokes, which blur or vanish once this is scaled down
+// to a 16px favicon; flat horizontal bars stay crisp at any size because
+// they're solid rectangles, not lines.
+//
+// Bars in --text-soft (quiet, secondary to the wordmark beside it); the
+// bottom dot in --teal — the same "circle = the signal" convention the
+// site's accent already carries everywhere else (the story index, "Your
+// angle"), so the mark and the rest of the interface read as one system.
 export default function Logo({ size = 22 }) {
   return (
     <svg
@@ -13,12 +26,10 @@ export default function Logo({ size = 22 }) {
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
     >
-      <rect x="2.5" y="2.5" width="19" height="19" rx="5" stroke="var(--text-faint)" strokeWidth="1.6" />
-      <path d="M6.5 8H17.5" stroke="var(--text-faint)" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M6.5 12H10.1" stroke="var(--text-faint)" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M13.9 12H17.5" stroke="var(--text-faint)" strokeWidth="1.6" strokeLinecap="round" />
-      <path d="M6.5 16H17.5" stroke="var(--text-faint)" strokeWidth="1.6" strokeLinecap="round" />
-      <circle cx="12" cy="12" r="1.7" fill="var(--teal)" />
+      <rect x="4" y="3.6" width="16" height="2.6" fill="var(--text-soft)" />
+      <rect x="6.75" y="8.6" width="10.5" height="2.6" fill="var(--text-soft)" />
+      <rect x="9.25" y="13.6" width="5.5" height="2.4" fill="var(--text-soft)" />
+      <circle cx="12" cy="19.3" r="2.15" fill="var(--teal)" />
     </svg>
   );
 }

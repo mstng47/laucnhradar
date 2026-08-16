@@ -44,7 +44,7 @@ export default function DeepDive({ text }) {
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        {open ? "Show less" : "Read the deep dive"}
+        {open ? "− Close" : "+ Deep dive"}
       </button>
       {open && (
         <div className="deep-dive-content">

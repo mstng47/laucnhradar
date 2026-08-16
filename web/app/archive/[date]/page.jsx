@@ -1,15 +1,15 @@
 import Link from "next/link";
 import ContentFrame from "../../components/ContentFrame";
-import PageIntro from "../../components/PageIntro";
+import BriefingOpen from "../../components/BriefingOpen";
 import Briefing from "../../components/Briefing";
 import { getEntriesForDate } from "../../lib/data";
-import { formatDate, estimateReadingMinutes } from "../../lib/format";
+import { formatDate, estimateReadingMinutes, groupSections } from "../../lib/format";
 
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }) {
   const { date } = await params;
-  return { title: `${date} — Sift` };
+  return { title: `${date} · Sift` };
 }
 
 export default async function ArchiveDate({ params }) {
@@ -24,26 +24,33 @@ export default async function ArchiveDate({ params }) {
     loadError = err.message;
   }
 
-  const meta = !loadError && entries.length > 0 && (
-    <>
-      <span>
-        {entries.length} item{entries.length === 1 ? "" : "s"}
-      </span>
-      <span className="meta-dot">·</span>
-      <span>{estimateReadingMinutes(entries)} min read</span>
-    </>
-  );
+  const mainCount = !loadError && entries.length > 0 ? groupSections(entries).main.length : 0;
+  const readMinutes = !loadError && entries.length > 0 ? estimateReadingMinutes(entries) : 0;
+  const meta =
+    !loadError &&
+    entries?.length > 0 &&
+    (mainCount > 0
+      ? `${readMinutes} min read`
+      : `${entries.length} item${entries.length === 1 ? "" : "s"} · ${readMinutes} min read`);
 
   return (
     <ContentFrame>
-      <PageIntro eyebrow={formatDate(date, { weekday: "long" })} meta={meta} />
-      <main className="container">
-        <p className="back-row">
-          <Link href="/archive" className="back-link">
-            ← All briefings
-          </Link>
-        </p>
+      <p className="back-row container">
+        <Link href="/archive" className="back-link">
+          ← All briefings
+        </Link>
+      </p>
 
+      {!loadError && entries.length > 0 && (
+        <BriefingOpen
+          eyebrow={formatDate(date, { weekday: "long" })}
+          heading="What mattered that day"
+          mainCount={mainCount}
+          meta={meta}
+        />
+      )}
+
+      <main className="container">
         {loadError && <p className="error">Couldn&apos;t load this briefing: {loadError}</p>}
 
         {!loadError && entries.length === 0 && (

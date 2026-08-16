@@ -1,16 +1,19 @@
 import DeepDive from "./DeepDive";
 
 export default function BriefingList({ entries }) {
+  const total = String(entries.length).padStart(2, "0");
+
   return (
-    <ol className="briefing-list">
+    <ol className="story-list">
       {entries.map((entry, index) => (
-        <li className="briefing-item" key={entry.id}>
-          <div className="item-head">
-            <span className="item-index" aria-hidden="true">
+        <li className="story" key={entry.id}>
+          <div className="story-head">
+            <span className="story-index" aria-hidden="true">
               {String(index + 1).padStart(2, "0")}
+              <span className="story-index-total"> / {total}</span>
             </span>
             <a
-              className="item-headline"
+              className="story-headline"
               href={entry.url}
               target="_blank"
               rel="noreferrer noopener"
@@ -19,14 +22,14 @@ export default function BriefingList({ entries }) {
             </a>
           </div>
 
-          <p className="item-body">{entry.what_happened}</p>
+          <p className="story-summary">{entry.what_happened}</p>
 
-          <div className="why-marker">
-            <span className="why-label">Why it matters</span>
+          <div className="story-angle">
+            <span className="story-angle-label">Your angle</span>
             <p>{entry.why_it_matters}</p>
           </div>
 
-          <div className="item-footer">
+          <div className="story-meta">
             {entry.new_terms?.length > 0 && (
               <div className="chips">
                 {entry.new_terms.map((term) => (
@@ -36,18 +39,22 @@ export default function BriefingList({ entries }) {
                 ))}
               </div>
             )}
-            <div className="item-attribution">
-              <span className="source-tag">{entry.source}</span>
+            <a
+              className="story-source"
+              href={entry.url}
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              <span>{entry.source}</span>
               {Number.isFinite(entry.article_read_minutes) && (
-                <>
-                  <span className="meta-dot">·</span>
-                  <span className="read-time">{entry.article_read_minutes} min read</span>
-                </>
+                <span>· {entry.article_read_minutes} min</span>
               )}
-            </div>
+              <span className="story-source-arrow" aria-hidden="true">
+                ↗
+              </span>
+            </a>
+            <DeepDive text={entry.deep_dive} />
           </div>
-
-          <DeepDive text={entry.deep_dive} />
         </li>
       ))}
     </ol>

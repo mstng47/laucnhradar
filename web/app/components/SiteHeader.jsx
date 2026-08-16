@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Logo from "./Logo";
 
-const NAV = [
-  { href: "/", label: "News" },
-  { href: "/about", label: "About" },
-  { href: "/archive", label: "Archive" },
-  { href: "/contact", label: "Contact" },
-];
+// The header is what a reader sees every morning using the product, not
+// a marketing site's nav bar — it only needs the two things that's about:
+// today's briefing (the brand mark itself, linking home) and the archive
+// of past ones. About/Contact are marketing-site pages, not part of the
+// daily habit, so they live in the footer (see SignOff) instead.
+const NAV = [{ href: "/archive", label: "Archive" }];
 
 export default function SiteHeader() {
   const pathname = usePathname();

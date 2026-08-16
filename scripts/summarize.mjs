@@ -109,6 +109,13 @@ For "also" items, write:
 Rules:
 - Never use jargon without defining it in new_terms (main section only)
 - No hype language ("game-changing", "revolutionary", "massive")
+- No em dashes (—) anywhere, in any field. Use a comma, a colon, parentheses,
+  or a separate sentence instead.
+- No stock AI-newsletter phrasing — "worth watching", "worth keeping an eye
+  on", "remains to be seen", "time will tell", "stay tuned", "in today's
+  fast-moving landscape", or similar filler. If a sentence could appear in
+  any AI news roundup unchanged, rewrite it to say something specific to
+  this story instead.
 - The whole briefing, all three sections combined, must be readable in about
   two minutes
 

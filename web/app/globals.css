@@ -2,10 +2,13 @@
    layout is the default and desktop only widens it.
 
    Palette lives entirely in the :root block below — change a value there
-   and it updates everywhere it's used. Two accents, each with one fixed
-   meaning: teal = headlines, links & the "why it matters" marker; violet =
-   source tags & glossary terms. This is an editorial reading page, not a
-   dashboard — no card panels, no third "alert" colour. */
+   and it updates everywhere it's used. One accent, one meaning: teal marks
+   whatever is selected, personalised or interactive (headlines, links, the
+   index numbers, "Your angle"). A second, narrower accent (--accent-warm)
+   marks itemised detail — deep-dive bullets only. Neither appears anywhere
+   else, so when either shows up it actually carries information. This is
+   an editorial reading page, not a dashboard — no card panels, no pill
+   badges, no third "alert" colour. */
 
 :root {
   color-scheme: light;
@@ -32,22 +35,39 @@
   --text: #16171c; /* ~18.5:1 on --bg — headlines, links, body copy */
   --text-rgb: 22, 23, 28; /* same colour, for the panel's own low-opacity dot-grid */
   --text-soft: #53565f; /* ~7.4:1 on --bg — secondary/supporting text */
-  --text-faint: #9c988a; /* ~2.7:1 — decorative only (dots, dividers), never text */
+  --text-faint: #9c988a; /* ~2.7:1 — decorative only (dots, dividers, tag borders), never text */
 
-  /* Accents — darkened from the old dark-theme values so they still clear
-     4.5:1 against a light --bg instead of a dark one. Used as both solid
-     colour and, via the *-rgb triplets, translucent tints for chips. */
+  /* The one accent. Used only where something is selected for this reader
+     or is directly interactive — never decoratively. */
   --teal: #0d7e88; /* ~4.9:1 on --bg */
   --teal-rgb: 13, 126, 136;
-  --violet: #6a5cb5; /* ~5.3:1 on --bg */
-  --violet-rgb: 106, 92, 181;
+
+  /* The other accent — narrower still: it marks itemised detail inside an
+     expanded deep dive, and nowhere else. Not a general "second colour". */
+  --accent-warm: #c2451f; /* ~4.6:1 on --bg, decorative use only */
+  --accent-warm-rgb: 194, 69, 31;
+
   --error: #b3392a; /* ~6.1:1 on --bg */
   --error-rgb: 179, 57, 42;
 
-  /* Bullet-marker accent only (list squares) — decorative, not held to the
-     text contrast bar above. */
-  --marker: #e0451f;
-  --marker-rgb: 224, 69, 31;
+  /* ---------- Spacing scale ---------- */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.4rem;
+  --space-xs: 0.65rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.25rem;
+  --space-xl: 3rem;
+  --space-2xl: 4rem;
+
+  /* ---------- Type scale (component/meta sizes; headline & body sizes
+     are still set explicitly where they need their own desktop step) ---------- */
+  --text-2xs: 0.7rem;
+  --text-xs: 0.78rem;
+  --text-sm: 0.85rem;
+  --text-md: 1.02rem;
+  --text-lg: 1.3rem;
+  --text-xl: 1.6rem;
 
   --content-width: 55rem; /* 880px — shared by the header bar and the
     white content panel; identical value, identical horizontal padding
@@ -55,15 +75,19 @@
 
   /* Single source of truth for both frames' width, so they can never
      drift apart again the way header and panel once did. Mobile keeps a
-     minimal 1rem gutter; the desktop override further down widens it for
-     the "floating sheet on a dark surface" look. */
-  --frame-width: min(calc(100% - 2rem), var(--content-width));
+     tight gutter so more of the screen is spent on reading; the desktop
+     override further down widens it for the "floating sheet on a dark
+     surface" look, which only earns its keep once there's room for it. */
+  --frame-width: min(calc(100% - 1rem), var(--content-width));
 
   /* Chamfered-corner frame: shared by every framed content block (see
      "Framed content blocks" below) so the cut always reads as the same
-     die size everywhere it's used, not a one-off per component. Top
-     corners cut at 45°, bottom corners stay square. */
-  --chamfer: 0.9rem;
+     die size everywhere it's used, not a one-off per component. Smaller
+     on mobile (a big notch on a narrow screen reads as heavy framing,
+     not craft) and restored to full size once the desktop override below
+     gives it room to breathe. Top corners cut at 45°, bottom corners stay
+     square. */
+  --chamfer: 0.55rem;
   --frame-clip: polygon(
     var(--chamfer) 0,
     calc(100% - var(--chamfer)) 0,
@@ -179,13 +203,10 @@ a {
   color: inherit;
 }
 
-/* One container, used everywhere — header, intro block and content all
+/* One container, used everywhere — header, opening block and content all
    share this exact width/padding, so they share the same left and right
-   edges. (A previous version used a second, wider .container-wide just
-   for the content area, which was the actual cause of the three
-   different left edges reported — that class is gone now.)
-   padding-left/right only, deliberately — .container is combined with
-   other classes (.page-intro, .header-bar) that set their own vertical
+   edges. padding-left/right only, deliberately — .container is combined
+   with other classes (.open, .header-bar) that set their own vertical
    padding, and a shorthand `padding` here would silently zero those out
    whenever this rule happened to be the last one the cascade saw. */
 .container {
@@ -197,7 +218,7 @@ a {
 
 main {
   color: var(--text);
-  padding: 1.5rem 0 1rem;
+  padding: 0.75rem 0 1rem;
 }
 
 /* ---------- Framed content blocks ----------
@@ -213,14 +234,16 @@ main {
    abruptly at the chamfered corners. drop-shadow runs after clipping, so
    it hugs the cut shape instead. This is what makes the panel read as a
    physical sheet resting on the dark surface rather than a block welded
-   to it. */
+   to it. Mobile keeps the shadow light — a deep, wide shadow around a
+   narrow phone-width sheet reads as heavy framing eating the page, not
+   as depth. */
 .content-frame {
   width: var(--frame-width);
-  margin: 0.75rem auto 2.5rem;
+  margin: 0.5rem auto 1.75rem;
   padding: 1px;
   background: var(--hairline);
   clip-path: var(--frame-clip);
-  filter: drop-shadow(0 24px 64px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 10px 26px rgba(0, 0, 0, 0.32));
 }
 
 .content-frame-inner {
@@ -260,11 +283,11 @@ main {
    same pixel — see the note on --content-width. */
 .header-frame {
   width: var(--frame-width);
-  margin: 1rem auto;
+  margin: 0.6rem auto;
   padding: 1px;
   background: var(--chrome-hairline);
   clip-path: var(--frame-clip);
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.28));
 }
 
 .header-frame-inner {
@@ -294,14 +317,14 @@ main {
      padding-left/right at mobile width (no protecting override there,
      unlike desktop's later media-query rule) — the actual cause of the
      header having a different left edge than the content below it. */
-  padding-top: 0.85rem;
-  padding-bottom: 0.85rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
   transition: padding 150ms ease;
 }
 
 .site-header.is-scrolled .header-bar {
-  padding-top: 0.55rem;
-  padding-bottom: 0.55rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
 }
 
 .brand {
@@ -327,11 +350,15 @@ main {
 }
 
 .nav-link {
+  display: inline-flex;
+  align-items: center;
   color: var(--chrome-text-soft);
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
   font-weight: 600;
-  padding: 0.3rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.5rem 0;
   transition: color 0.15s ease;
   white-space: nowrap;
 }
@@ -346,15 +373,17 @@ main {
 
 /* ---------- Masthead ---------- */
 /* The one hero moment on every page, before anything page-specific
-   starts — sized and composed like an old broadsheet's nameplate, not a
-   modern app header: a serif nameplate at real size, a thick-then-thin
-   double rule instead of a single hairline. Logo left, nameplate beside
-   it, tagline + date right — the one layout on this site that splits
-   left/right rather than stacking, so the logo mark earns its place
-   back here specifically to anchor that left side. */
+   starts. Deliberately smaller and quieter than a broadsheet nameplate —
+   this is a product's identity mark, not a newspaper flag, so the
+   wordmark reads as confident rather than oversized, and the tagline and
+   date collapse into one quiet small-caps line rather than the tagline
+   dominating its own. Logo left, wordmark beside it, meta line right —
+   the one layout on this site that splits left/right rather than
+   stacking, so the logo mark earns its place back here specifically to
+   anchor that left side. */
 .masthead {
-  padding-top: 3rem;
-  padding-bottom: 2rem;
+  padding-top: var(--space-lg);
+  padding-bottom: var(--space-sm);
 }
 
 .masthead-row {
@@ -362,66 +391,58 @@ main {
   align-items: flex-end;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 1rem 2rem;
+  gap: 0.65rem 1.5rem;
 }
 
 .masthead-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.55rem;
 }
 
 .masthead-wordmark {
   margin: 0;
   font-family: var(--font-masthead);
   font-weight: 800;
-  font-size: 2.75rem;
+  font-size: 2rem;
   line-height: 1;
   color: var(--text);
 }
 
-.masthead-writing {
-  max-width: 34ch;
-  /* Right-aligned to sit flush with the rule/panel edge on its side —
-     overridden to left on narrow screens, where a right-aligned
-     paragraph that's wrapped to several lines gets hard to read. */
-  text-align: right;
-}
-
-@media (max-width: 33.9375rem) {
-  .masthead-writing {
-    text-align: left;
-  }
+/* One quiet line — tagline and date collapsed together, same small-caps
+   treatment throughout, rather than the tagline running as its own large
+   italic sentence. Right-aligned to sit flush with the rule/panel edge
+   on its side — overridden to left on narrow screens, where a
+   right-aligned line wraps awkwardly. */
+.masthead-meta {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
 }
 
 .masthead-tagline {
-  margin: 0;
-  font-family: var(--font-masthead);
-  font-style: italic;
+  font-style: normal;
   font-weight: 700;
   color: var(--text-soft);
-  font-size: 1rem;
-  line-height: 1.45;
 }
 
-/* font-variant-caps, not text-transform: uppercase — the markup keeps
-   normal casing so the browser can render true small-caps glyphs instead
-   of just full-height capitals. */
 .masthead-date {
-  margin: 0.5rem 0 0;
-  font-size: 0.85rem;
-  color: var(--text-soft);
-  font-variant-caps: small-caps;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
+  font-weight: 500;
+  color: var(--text-faint);
 }
 
 /* The double rule: a thick line, a small gap, then a thin one — the one
-   recurring device in old newspaper mastheads for separating the
-   nameplate from the dateline beneath it. */
+   recurring device separating the wordmark from what follows. */
 .masthead-rule-thick {
   height: 3px;
-  margin-top: 1.75rem;
+  margin-top: 1.15rem;
   background: var(--text);
 }
 
@@ -431,36 +452,80 @@ main {
   background: var(--text);
 }
 
-/* ---------- Page intro (eyebrow + meta, per page) ---------- */
+/* ---------- Briefing opening ----------
+   Bridges the masthead and the story list: the one place that states,
+   plainly, that this is today's briefing, that it holds a specific
+   number of stories, and that it's quick. The large numeral deliberately
+   echoes the "01 / 05" index used on each story below it, so the count
+   here reads as the same system continuing, not a separate stat. */
+.open {
+  padding-top: var(--space-sm);
+  padding-bottom: var(--space-sm);
+  border-bottom: 1px solid var(--hairline);
+}
+
+.open-eyebrow {
+  margin: 0 0 0.5rem;
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--teal);
+}
+
+.open-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.open-count {
+  flex-shrink: 0;
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.open-stat-text {
+  min-width: 0;
+}
+
+.open-heading {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.open-meta {
+  margin: 0.3rem 0 0;
+  font-size: var(--text-sm);
+  color: var(--text-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Simpler fallback for the rare day with no full-detail stories — no
+   numeral to avoid a hollow "00", just the eyebrow and a plain line. */
+.open-fallback {
+  margin: 0;
+  font-size: var(--text-md);
+  color: var(--text-soft);
+}
+
+/* ---------- Page intro (eyebrow-only, for stub/index pages) ---------- */
 
 .page-intro {
-  /* top/bottom only — see the note on .header-bar just above. Trimmed
-     from 1.5rem now that .masthead sits above this and already supplies
-     the panel's top breathing room. */
-  padding-top: 0.75rem;
-  padding-bottom: 0.5rem;
+  padding-top: var(--space-xs);
+  padding-bottom: var(--space-2xs);
 }
 
 .eyebrow {
   color: var(--text-soft);
   margin: 0;
-  font-size: 0.95rem;
-}
-
-.meta-bar {
-  margin-top: 0.6rem;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem 0.6rem;
-  font-size: 0.85rem;
-  color: var(--text-soft);
-  font-variant-numeric: tabular-nums;
-}
-
-.meta-bar strong {
-  color: var(--text-soft);
-  font-weight: 600;
+  font-size: var(--text-md);
 }
 
 .meta-dot {
@@ -475,7 +540,7 @@ main {
   display: inline-block;
   color: var(--teal);
   text-decoration: none;
-  font-size: 0.92rem;
+  font-size: var(--text-md);
   padding: 0.4rem 0;
 }
 
@@ -487,11 +552,11 @@ main {
 
 .stub-copy {
   max-width: 70ch; /* ~68-72 character measure, same target as the
-    reading body text below (.item-body etc.) — ch is the width of "0"
-    in the current font, the standard unit for capping line length
+    reading body text below (.story-summary etc.) — ch is the width of
+    "0" in the current font, the standard unit for capping line length
     regardless of font metrics or the panel's own pixel width. */
   margin: 0;
-  padding: 1.5rem 0 2rem;
+  padding: var(--space-md) 0 var(--space-lg);
   color: var(--text);
   font-size: 1rem;
   line-height: 1.7;
@@ -510,164 +575,196 @@ main {
 }
 
 /* ---------- Section headings ---------- */
-
-.section-heading {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1.05rem;
-  color: var(--text);
-  margin: 2.75rem 0 1rem;
-}
-
-/* Lighter than .section-heading — "New launches" and "Also worth knowing"
-   are quick scans, not full reads, and should read as quieter than "What
-   matters today". */
+/* "New launches", "Also worth knowing" and "Terms explained today" are
+   quick scans, not full reads — deliberately quieter than the opening
+   block above, so they read as extras that follow the main five rather
+   than a peer section. */
 .section-heading-light {
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 0.76rem;
+  font-size: var(--text-xs);
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--text-soft);
-  margin: 2.75rem 0 0.75rem;
+  margin: var(--space-lg) 0 var(--space-xs);
 }
 
-/* Whichever section renders first (usually "What matters today", but a
-   thin day could start with "New launches" instead) shouldn't have a big
-   gap above it — main already provides top padding. */
-main > section:first-child > .section-heading,
+/* Whichever secondary section renders first (main might be empty some
+   days) shouldn't carry a big gap above it if .open already supplied
+   the top breathing room. */
 main > section:first-child > .section-heading-light {
   margin-top: 0;
 }
 
-/* ---------- Compact list (launches, also worth knowing, today's terms) ---------- */
-/* One column, stacked in document order under "What matters today" —
-   lighter/smaller than .briefing-item throughout: no card, no
-   why-marker, a single line per entry. */
+/* ---------- Brief list (launches, also worth knowing) ---------- */
+/* One column, stacked in document order — lighter/smaller than .story
+   throughout: no index, no angle marker, a compact two-line row per
+   entry (name + source, then a one-line description) rather than a
+   single run-on line. */
 
-.compact-list {
+.brief-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.compact-item {
-  padding: 0.65rem 0;
+.brief-row {
+  padding: var(--space-xs) 0;
   border-top: 1px solid var(--hairline);
-  font-size: 0.96rem;
-  line-height: 1.6;
-  color: var(--text-soft);
 }
 
-.compact-list li:first-child {
+.brief-list li:first-child {
   border-top: none;
   padding-top: 0;
 }
 
-.compact-name {
+.brief-row-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.brief-row-name {
   color: var(--text);
   font-weight: 600;
+  font-size: var(--text-md);
   text-decoration: none;
 }
 
-.compact-name:hover {
+.brief-row-name:hover {
   color: var(--teal);
   text-decoration: underline;
 }
 
-.compact-source {
-  display: inline-block;
-  margin-left: 0.45rem;
-  color: var(--violet);
+.brief-row-source {
+  flex-shrink: 0;
+  color: var(--text-faint);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  font-size: var(--text-2xs);
   font-weight: 700;
   white-space: nowrap;
 }
 
-.today-terms li {
-  padding: 0.65rem 0;
-  border-top: 1px solid var(--hairline);
-}
-
-.today-terms li:first-child {
-  border-top: none;
-  padding-top: 0;
-}
-
-.today-terms .chip {
-  margin-bottom: 0.4rem;
-}
-
-.today-term-def {
-  margin: 0;
+.brief-row-desc {
+  margin: 0.3rem 0 0;
   color: var(--text-soft);
-  font-size: 0.92rem;
-  line-height: 1.55;
+  font-size: var(--text-sm);
+  line-height: 1.6;
 }
 
-/* ---------- Briefing list ---------- */
+/* ---------- Terms explained today ---------- */
+/* Its own small recurring pattern, distinct from the brief list above —
+   a flat tag naming the term, its definition beside (desktop) or below
+   (mobile) it. */
 
-.briefing-list {
+.term-list {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.briefing-item {
-  padding: 2.25rem 0;
+.term-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: var(--space-xs) 0;
   border-top: 1px solid var(--hairline);
 }
 
-.briefing-item:first-child {
+.term-list li:first-child {
   border-top: none;
-  padding-top: 0.5rem;
+  padding-top: 0;
+}
+
+.term-tag {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  padding: 0.15rem 0.5rem;
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-soft);
+}
+
+.term-def {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+}
+
+/* ---------- Story list ---------- */
+
+.story-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.story {
+  padding: var(--space-lg) 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.story:first-child {
+  border-top: none;
+  padding-top: var(--space-sm);
 }
 
 /* Fade-and-rise as each story enters the viewport (see StoryReveal.jsx),
    scoped entirely inside this media query — a user with no-preference
-   never set gets .briefing-item at its normal, final opacity/position
-   from the very first paint; there's no hidden state for JS to fail to
-   reveal. */
+   never set gets .story at its normal, final opacity/position from the
+   very first paint; there's no hidden state for JS to fail to reveal. */
 @media (prefers-reduced-motion: no-preference) {
-  .briefing-item {
+  .story {
     opacity: 0;
     transform: translateY(12px);
     transition: opacity 400ms ease, transform 400ms ease;
   }
 
-  .briefing-item.reveal-visible {
+  .story.reveal-visible {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.item-head {
+.story-head {
   display: flex;
   align-items: baseline;
   gap: 0.65rem;
 }
 
-.item-index {
+.story-index {
   flex-shrink: 0;
   font-family: var(--font-body);
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   letter-spacing: 0.02em;
   color: var(--teal);
+  white-space: nowrap;
 }
 
-.item-headline {
+.story-index-total {
+  color: var(--text-faint);
+  font-weight: 600;
+}
+
+.story-headline {
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 1.32rem;
   line-height: 1.35;
-  /* Near-white, not teal — teal on dark navy read as low-contrast at
-     this size even though it technically passed WCAG (~6.5:1). Teal is
-     reserved for links/why-marker/nav now; this still IS a link, so it
-     brightens to the vivid --teal on hover for the click affordance. */
+  /* Near-black, not teal — teal on paper at this size and weight starts
+     competing with the accent's one real job (marking selection/
+     interactivity), so it's reserved for the hover state here instead. */
   color: var(--text);
   text-decoration: none;
   text-wrap: balance;
@@ -675,40 +772,41 @@ main > section:first-child > .section-heading-light {
   transition: color 0.2s ease;
 }
 
-.item-headline:hover {
+.story-headline:hover {
   color: var(--teal);
   text-decoration: underline;
 }
 
-.item-body {
+/* Secondary to the headline on purpose — softer colour, regular weight,
+   where the headline is bold and near-black. */
+.story-summary {
   max-width: 70ch; /* newspaper measure — see the note on .stub-copy */
-  margin: 0.85rem 0 0;
-  color: var(--text);
-  /* Matches --why-marker p's weight so this reads with the same visual
-     presence as "why it matters" below it, not dimmer — same colour as
-     that text already, the difference was weight, not contrast. */
-  font-weight: 500;
-  line-height: 1.75;
+  margin: 0.75rem 0 0;
+  color: var(--text-soft);
+  font-weight: 400;
+  line-height: 1.7;
   font-size: 1.02rem;
 }
 
-.why-marker {
-  margin: 1.2rem 0 0;
-  padding-left: 1rem;
-  border-left: 3px solid var(--teal);
+/* "Your angle" — Sift's own reading on a story, not a generic pull-quote.
+   Restrained by design: a rule and a label carry it, not a filled box. */
+.story-angle {
+  margin: 1.1rem 0 0;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--teal);
 }
 
-.why-label {
+.story-angle-label {
   display: block;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  font-size: var(--text-2xs);
   font-weight: 700;
   color: var(--teal);
   margin-bottom: 0.35rem;
 }
 
-.why-marker p {
+.story-angle p {
   max-width: 70ch; /* newspaper measure — see the note on .stub-copy */
   margin: 0;
   color: var(--text);
@@ -717,13 +815,13 @@ main > section:first-child > .section-heading-light {
   font-size: 1.03rem;
 }
 
-.item-footer {
-  margin-top: 1.25rem;
+.story-meta {
+  margin-top: var(--space-sm);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 1rem;
-  font-size: 0.85rem;
+  row-gap: 0.4rem;
+  column-gap: 0.75rem;
 }
 
 .chips {
@@ -732,68 +830,82 @@ main > section:first-child > .section-heading-light {
   gap: 0.4rem;
 }
 
+/* Flat rectangular tag, not a pill — every chip/tag on this site shares
+   this shape now, so a rounded badge never sneaks back in per-component. */
 .chip {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
-  padding: 0.2rem 0.6rem;
-  font-size: 0.76rem;
-  font-weight: 600;
-  border: 1px solid transparent;
-  white-space: nowrap;
-  background: rgba(var(--violet-rgb), 0.13);
-  color: var(--violet);
-  border-color: rgba(var(--violet-rgb), 0.32);
-}
-
-.item-attribution {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.source-tag {
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  padding: 0.15rem 0.5rem;
+  font-size: var(--text-2xs);
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-weight: 700;
-  font-size: 0.78rem;
-  color: var(--violet);
+  color: var(--text-soft);
+  white-space: nowrap;
 }
 
-.read-time {
+/* The quiet path to the original article — source and read time as one
+   small link, subordinate to Sift's own content, not a coloured badge. */
+.story-source {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
   color: var(--text-soft);
-  font-size: 0.8rem;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  white-space: nowrap;
+  transition: color 0.15s ease;
+}
+
+.story-source:hover {
+  color: var(--teal);
+}
+
+.story-source-arrow {
+  font-weight: 500;
 }
 
 /* ---------- Deep dive (expand-in-place) ---------- */
+/* Always starts its own line within .story-meta (flex-basis: 100%) so it
+   reads as part of the same quiet metadata cluster rather than the large
+   standalone link this used to be. */
 
 .deep-dive {
-  margin-top: 1.1rem;
+  flex-basis: 100%;
 }
 
 .deep-dive-toggle {
   font-family: var(--font-body);
   font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--teal);
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-soft);
   background: none;
-  border: none;
-  padding: 0;
+  border: 1px solid var(--hairline);
+  border-radius: 2px;
+  padding: 0.5rem 0.7rem;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
-.deep-dive-toggle:hover {
-  color: var(--text);
+.deep-dive-toggle:hover,
+.deep-dive-toggle[aria-expanded="true"] {
+  color: var(--teal);
+  border-color: var(--teal);
 }
 
 /* Same border/clip-path pairing as .content-frame — a plain `border`
    doesn't follow a clip-path's cut edge, so the border colour lives on
    this outer layer and shows through the inner layer's 1px inset. */
 .deep-dive-content {
-  margin-top: 1rem;
+  margin-top: 0.75rem;
   padding: 1px;
   background: var(--hairline);
   clip-path: var(--frame-clip);
@@ -835,7 +947,7 @@ main > section:first-child > .section-heading-light {
 
 /* Small solid square instead of a round bullet, positioned by hand since
    list-style is off above (::marker can't be sized/coloured reliably
-   across browsers). */
+   across browsers). The one place --accent-warm appears. */
 .deep-dive-list li {
   position: relative;
   margin: 0.3rem 0;
@@ -849,7 +961,7 @@ main > section:first-child > .section-heading-light {
   top: 0.62em;
   width: 7px;
   height: 7px;
-  background: var(--marker);
+  background: var(--accent-warm);
 }
 
 /* ---------- Archive ---------- */
@@ -889,37 +1001,41 @@ main > section:first-child > .section-heading-light {
 
 .archive-count {
   color: var(--text-soft);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Sign-off ----------
-   Was a separate dark footer bar; now the quiet end of the briefing,
-   inside the white panel itself (same .container + text-soft treatment
-   as the rest of the reading content, not chrome). */
+   The quiet end of the briefing, inside the white panel itself (same
+   .container + text-soft treatment as the rest of the reading content,
+   not chrome). Carries About/Contact — the marketing-site pages a daily
+   reader doesn't need in the header they see every morning. */
 .sign-off {
-  margin-top: 3rem;
-  padding-top: 1.25rem;
-  padding-bottom: 2rem;
+  margin-top: var(--space-xl);
+  padding-top: var(--space-md);
+  padding-bottom: var(--space-lg);
   border-top: 1px solid var(--hairline);
   color: var(--text-soft);
 }
 
 .sign-off-about {
-  margin: 0 0 0.5rem;
-  font-size: 0.82rem;
+  margin: 0 0 0.75rem;
+  font-size: var(--text-sm);
   line-height: 1.6;
 }
 
 .sign-off-nav {
-  margin-bottom: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-bottom: 0.6rem;
 }
 
 .sign-off-nav a {
   color: var(--text-soft);
   text-decoration: none;
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-weight: 600;
 }
 
@@ -930,7 +1046,7 @@ main > section:first-child > .section-heading-light {
 
 .sign-off-note {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
 }
 
 /* ---------- Desktop ---------- */
@@ -940,33 +1056,46 @@ main > section:first-child > .section-heading-light {
     font-size: 19px;
   }
   :root {
-    /* Generous gutters once there's room for them — the mobile 1rem
-       minimum stays too tight for the "floating sheet" feel the drop
-       shadow and dark margins are going for. */
+    /* Generous gutters once there's room for them — the mobile minimum
+       stays tight so more of a phone screen is spent reading; this is
+       the "floating sheet" look earning its keep on a wider canvas. */
     --frame-width: min(calc(100% - 6rem), var(--content-width));
-  }
-  .header-frame {
-    margin: 1.75rem auto 0.5rem;
+    --chamfer: 0.9rem;
   }
   .content-frame {
     margin-top: 0.5rem;
+    margin-bottom: 2.5rem;
+    filter: drop-shadow(0 24px 64px rgba(0, 0, 0, 0.45));
+  }
+  .header-frame {
+    margin: 1.75rem auto 0.5rem;
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35));
   }
   .masthead {
-    padding-top: 4.5rem;
-    padding-bottom: 2.75rem;
+    padding-top: 4rem;
+    padding-bottom: 1.5rem;
   }
   .masthead-wordmark {
-    font-size: 4.5rem;
+    font-size: 2.75rem;
   }
-  .masthead-tagline {
-    font-size: 1.2rem;
+  .masthead-meta {
+    font-size: 0.78rem;
+    justify-content: flex-end;
+    text-align: right;
+  }
+  .open {
+    padding-top: var(--space-md);
+    padding-bottom: var(--space-md);
+  }
+  .open-count {
+    font-size: 3.25rem;
   }
   .container {
     padding-left: 2rem;
     padding-right: 2rem;
   }
   main {
-    padding: 1.75rem 0 1.5rem;
+    padding: 1.25rem 0 1.5rem;
   }
   .header-bar {
     gap: 1rem;
@@ -981,13 +1110,23 @@ main > section:first-child > .section-heading-light {
   .main-nav {
     gap: 1.4rem;
   }
-  .nav-link {
-    font-size: 0.9rem;
+  .story {
+    padding: var(--space-xl) 0;
   }
-  .item-headline {
+  .story:first-child {
+    padding-top: var(--space-sm);
+  }
+  .story-headline {
     font-size: 1.55rem;
   }
-  .item-body {
+  .story-summary {
     font-size: 1.05rem;
+  }
+}
+
+@media (max-width: 33.9375rem) {
+  .masthead-meta {
+    justify-content: flex-start;
+    text-align: left;
   }
 }
