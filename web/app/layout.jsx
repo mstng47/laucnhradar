@@ -1,23 +1,17 @@
-import { Inter, Playfair_Display } from "next/font/google";
+import { JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "./components/SiteHeader";
 
-// Grotesk everywhere for nav, body and headlines — see the "no serif"
-// rationale in globals.css's opening comment. Playfair Display is the
-// one deliberate exception: an old-newspaper-style display serif, used
-// nowhere but the masthead nameplate/tagline (see Masthead.jsx), where a
-// grotesk wordmark can't read as "old newspaper" no matter how large.
-const inter = Inter({
+// One monospace family for the whole site — nav, body, headlines and
+// the masthead. Cascadia Mono/Code (the Windows Terminal default) isn't
+// on Google Fonts, so JetBrains Mono stands in for it: same "modern
+// terminal" family of coding fonts, comparable weight range and
+// legibility at body-copy sizes.
+const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  weight: ["700", "900"],
+  weight: ["400", "500", "600", "700", "800"],
   style: ["normal", "italic"],
-  variable: "--font-playfair",
+  variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
@@ -34,7 +28,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+    <html lang="en" className={jetbrainsMono.variable}>
       <body>
         <div className="bg-fixed" aria-hidden="true" />
         <SiteHeader />

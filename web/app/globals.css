@@ -73,15 +73,15 @@
     0 var(--chamfer)
   );
 
-  /* Grotesk sans for both headlines and body — --font-display kept as a
-     separate variable (rather than deleted) so callers don't need to
-     change, but it now points at the same family instead of a serif. */
-  --font-body: var(--font-inter), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* One monospace family for the whole site — headlines, body and the
+     masthead all point at the same variable now; --font-display and
+     --font-masthead are kept as separate names (rather than deleted) so
+     callers don't need to change, even though there's currently no
+     typeface difference between any of the three. */
+  --font-body: var(--font-jetbrains-mono), ui-monospace, "Cascadia Mono", "Cascadia Code",
+    "SFMono-Regular", Consolas, Menlo, monospace;
   --font-display: var(--font-body);
-
-  /* The one deliberate exception to "no serif" — the masthead nameplate
-     only (see the note in Masthead.jsx and layout.jsx). */
-  --font-masthead: var(--font-playfair), Georgia, "Times New Roman", serif;
+  --font-masthead: var(--font-body);
 }
 
 * {
@@ -311,7 +311,6 @@ main {
   font-family: var(--font-body);
   font-weight: 800;
   font-size: 1rem;
-  letter-spacing: -0.01em;
   color: var(--chrome-text);
   text-decoration: none;
   white-space: nowrap;
@@ -375,10 +374,9 @@ main {
 .masthead-wordmark {
   margin: 0;
   font-family: var(--font-masthead);
-  font-weight: 900;
+  font-weight: 800;
   font-size: 2.75rem;
   line-height: 1;
-  letter-spacing: -0.01em;
   color: var(--text);
 }
 
