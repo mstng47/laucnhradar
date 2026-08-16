@@ -2,7 +2,7 @@ import ContentFrame from "./components/ContentFrame";
 import PageIntro from "./components/PageIntro";
 import Briefing from "./components/Briefing";
 import { getLatestBriefing } from "./lib/data";
-import { formatDate, estimateReadingMinutes } from "./lib/format";
+import { estimateReadingMinutes } from "./lib/format";
 
 // Data changes daily via the pipeline's cron — always fetch fresh rather
 // than serving a build-time snapshot.
@@ -19,10 +19,10 @@ export default async function Home() {
     loadError = err.message;
   }
 
+  // No date here — Masthead already shows today's date once, above this;
+  // repeating it in the same breath read as clutter rather than context.
   const meta = date && (
     <>
-      <strong>{formatDate(date)}</strong>
-      <span className="meta-dot">·</span>
       <span>
         {entries.length} item{entries.length === 1 ? "" : "s"}
       </span>
@@ -33,7 +33,7 @@ export default async function Home() {
 
   return (
     <ContentFrame>
-      <PageIntro eyebrow="Your daily AI briefing" meta={meta} />
+      <PageIntro meta={meta} />
       <main className="container">
         {loadError && <p className="error">Couldn&apos;t load the briefing: {loadError}</p>}
 

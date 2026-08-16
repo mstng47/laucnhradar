@@ -341,35 +341,56 @@ main {
 }
 
 /* ---------- Masthead ---------- */
-/* Top of every panel, above whatever the page itself renders — today's
-   date rather than the briefing's own date, so it reads the same across
-   every page/section (see the note in Masthead.jsx). font-variant-caps,
-   not text-transform: uppercase — the markup keeps normal casing so the
-   browser can actually render true small-caps glyphs instead of just
-   full-height capitals. */
+/* The one hero moment on every page — logo, name, one line on what Sift
+   is, today's date — before anything page-specific starts. Generous
+   padding on purpose: this is the "nice design of the company" beat, not
+   another row of dense stats, so it gets room to breathe that the old
+   single compressed line didn't have. */
 .masthead {
+  padding-top: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.masthead-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 1rem;
-  padding-top: 1.25rem;
-  padding-bottom: 0.85rem;
-  border-bottom: 1px solid var(--hairline);
-  font-variant-caps: small-caps;
-  letter-spacing: 0.02em;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
 }
 
 .masthead-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.masthead-wordmark {
   font-weight: 800;
-  font-size: 1.1rem;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
   color: var(--text);
 }
 
+/* font-variant-caps, not text-transform: uppercase — the markup keeps
+   normal casing so the browser can render true small-caps glyphs instead
+   of just full-height capitals. */
 .masthead-date {
   font-size: 0.85rem;
   color: var(--text-soft);
+  font-variant-caps: small-caps;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
   white-space: nowrap;
+}
+
+.masthead-tagline {
+  margin: 0.85rem 0 0;
+  max-width: 46ch;
+  color: var(--text-soft);
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
 /* ---------- Page intro (eyebrow + meta, per page) ---------- */
@@ -891,6 +912,16 @@ main > section:first-child > .section-heading-light {
   }
   .content-frame {
     margin-top: 0.5rem;
+  }
+  .masthead {
+    padding-top: 2.5rem;
+    padding-bottom: 1.75rem;
+  }
+  .masthead-wordmark {
+    font-size: 1.9rem;
+  }
+  .masthead-tagline {
+    font-size: 1.05rem;
   }
   .container {
     padding-left: 2rem;
