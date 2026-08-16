@@ -237,13 +237,17 @@ main {
 
 /* ---------- Nav header ---------- */
 
-/* Sticky, in normal document flow — the page scrolls under it. No
-   background of its own: the dark body shows through around the
-   narrower frame below it. */
+/* Sticky, in normal document flow — the page scrolls under it. Needs its
+   own opaque background, not just the dark body showing through: once
+   something has actually scrolled underneath a sticky element, that
+   scrolled content — not body — is what's directly behind it, including
+   through .header-frame's transparent chamfered-corner cutouts. Without
+   this, the white panel showed through those corners mid-scroll. */
 .site-header {
   position: sticky;
   top: 0;
   z-index: 10;
+  background: var(--chrome-bg);
 }
 
 /* Exactly --content-width, same as .content-frame below and the same
