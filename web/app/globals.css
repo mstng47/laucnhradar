@@ -1443,3 +1443,17 @@ main > section:first-child > .section-heading-light {
     text-align: left;
   }
 }
+
+/* Same slot/sizing as .deep-dive-toggle so it doesn't shift the row's
+   layout depending on which stories have a deep dive and which don't, but
+   unbordered and quieter - this is a statement, not a control. */
+.deep-dive-unavailable {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: var(--text-2xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-soft);
+  opacity: 0.6;
+  padding: 0.5rem 0.7rem;
+}
