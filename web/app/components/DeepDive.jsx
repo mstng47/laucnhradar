@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 
@@ -28,13 +28,22 @@ function renderDeepDiveText(text) {
     });
 }
 
-// Renders nothing when there's no deep dive — a source that couldn't be
-// fetched or summarized just means this item has no expand option, per the
-// pipeline's fallback behaviour in scripts/deep-dive.mjs.
+// A source the pipeline couldn't fetch or summarize (paywall, bot block, a
+// stray API failure - see scripts/deep-dive.mjs) has no expand option. That
+// used to render nothing at all, which reads as broken next to stories
+// right above/below it that DO have the button - this makes the absence
+// itself visible instead of silent, so it reads as "we tried" rather than
+// "this is missing".
 export default function DeepDive({ text }) {
   const [open, setOpen] = useState(false);
 
-  if (!text) return null;
+  if (!text) {
+    return (
+      <div className="deep-dive">
+        <span className="deep-dive-unavailable">No deep dive for this source</span>
+      </div>
+    );
+  }
 
   return (
     <div className="deep-dive">
@@ -44,7 +53,7 @@ export default function DeepDive({ text }) {
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
-        {open ? "− Close" : "+ Deep dive"}
+        {open ? "- Close" : "+ Deep dive"}
       </button>
       {open && (
         <div className="deep-dive-content">

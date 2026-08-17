@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import { DAY_SHORT, formatScheduleSummary } from "../lib/emailPreferences";
 
 // Displayed Monday-first (the usual week view) even though the value
-// stored and sent is still 0=Sunday..6=Saturday everywhere else — this is
+// stored and sent is still 0=Sunday..6=Saturday everywhere else - this is
 // the one place that ordering gets flipped, purely for how the buttons
 // lay out on screen.
 const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
@@ -32,7 +32,7 @@ function guessTimezone() {
   }
 }
 
-// mode: "create" (blank signup form) or "edit" (prefilled from a token —
+// mode: "create" (blank signup form) or "edit" (prefilled from a token -
 // see web/app/email/page.jsx). initial holds whatever the page already
 // knows: nothing for create, the subscriber's saved row for edit.
 export default function EmailPreferencesForm({ mode, token, initial }) {
@@ -181,8 +181,8 @@ export default function EmailPreferencesForm({ mode, token, initial }) {
       {daysValid && <p className="schedule-summary">{formatScheduleSummary({ days, sendTime, timezone })}</p>}
 
       <div className="form-actions">
-        <button type="submit" className="btn-primary" disabled={!daysValid || status === "saving"}>
-          {mode === "edit" ? "Save changes" : "Get Sift by email"}
+        <button type="submit" className="btn-primary" disabled={!daysValid || status === "saving"} aria-busy={status === "saving"}>
+          {status === "saving" ? "Saving..." : mode === "edit" ? "Save changes" : "Get Sift by email"}
         </button>
         {mode === "edit" && (
           <button type="button" className="btn-secondary" onClick={handleUnsubscribe} disabled={status === "saving"}>
@@ -191,15 +191,17 @@ export default function EmailPreferencesForm({ mode, token, initial }) {
         )}
       </div>
 
-      {status === "saved" && (
-        <p className="form-message">
-          {mode === "edit"
-            ? "Saved. A confirmation email is on its way."
-            : "Check your inbox — we've sent a confirmation with a link to manage or cancel this anytime."}
-        </p>
-      )}
-      {status === "unsubscribed" && <p className="form-message">Unsubscribed. You can turn delivery back on any time from this page.</p>}
-      {status === "error" && <p className="form-message is-error">{errorMessage}</p>}
+      <div aria-live="polite">
+        {status === "saved" && (
+          <p className="form-message">
+            {mode === "edit"
+              ? "Saved. A confirmation email is on its way."
+              : "Check your inbox - we've sent a confirmation with a link to manage or cancel this anytime."}
+          </p>
+        )}
+        {status === "unsubscribed" && <p className="form-message">Unsubscribed. You can turn delivery back on any time from this page.</p>}
+        {status === "error" && <p className="form-message is-error">{errorMessage}</p>}
+      </div>
     </form>
   );
 }
