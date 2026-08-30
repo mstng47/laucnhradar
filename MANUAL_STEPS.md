@@ -5,6 +5,37 @@ coding — it's copying, pasting and clicking.
 
 ---
 
+## Deployment order for the multi-reader change (read this first)
+
+Sift now generates a separate briefing per reader ("profile") — Finn, plus a
+test reader for Dawood — instead of one briefing for everyone. Getting this
+live needs three things, **and the order matters**:
+
+1. **Database first.** Run every file in `supabase/migrations/`, in filename
+   order (they're named so the order is obvious), in the Supabase SQL
+   Editor. This creates the `profiles` table, the Finn and Dawood rows,
+   and changes a couple of database rules so two readers can each have their
+   own row for the same story.
+2. **Then the pipeline code.** The version of `scripts/summarize.mjs` and
+   `scripts/deep-dive.mjs` that generates one briefing per profile only
+   works against the database rules from step 1 — it saves data in a shape
+   that only exists after those rules change.
+3. **Then the website code.** Same reasoning: the website's pages now ask
+   "show me this specific profile's stories," which only makes sense once
+   the database actually has profiles to ask for.
+
+**Why the order matters, in plain terms:** each step depends on the one
+before it existing already. Deploying the pipeline or website code before
+the database migrations have been run means those parts of the site start
+asking the database a question it doesn't know how to answer yet — that
+shows up as the daily pipeline failing (a red X in GitHub Actions) or a
+briefing page showing an error instead of stories. Running the database
+migrations on their own, before the code, is safe — nothing reads or writes
+the new pieces until the code catches up, so there's no rush to do the next
+two steps immediately after, just before either of them.
+
+---
+
 ## Add the "sections" column
 
 The briefing is now split into three sections — **What matters today** (the
@@ -222,9 +253,11 @@ Add each of these as its own repository secret — go to
 You don't need a developer for either of these. Edit the file on GitHub (open
 it, click the pencil icon, make your change, then **Commit changes**).
 
-- **Change who the briefing is written for** — edit
-  `scripts/reader-profile.md`. Rewrite the bullet points to match what you care
-  about. The next morning's briefing will follow the new profile.
+- **Change who a briefing is written for** — edit that reader's file in
+  `scripts/profiles/` (e.g. `finn.md`). Rewrite the bullet points to match
+  what you care about. The next morning's briefing will follow the new
+  profile. `scripts/profiles/index.json` lists every profile the pipeline
+  currently generates a briefing for.
 
 - **Change where the news comes from** — edit `config/sources.json`. Each source
   has a `name` and a `url`. Delete a block to remove a source.

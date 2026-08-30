@@ -8,7 +8,8 @@
     "summarize": "node scripts/summarize.mjs",
     "pipeline": "node scripts/run-pipeline.mjs",
     "check-sources": "node scripts/check-sources.mjs",
-    "send-emails": "node scripts/send-emails.mjs"
+    "send-emails": "node scripts/send-emails.mjs",
+    "add-test-subscriber": "node scripts/add-test-subscriber.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.0",

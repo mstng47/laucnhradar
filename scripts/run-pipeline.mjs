@@ -11,7 +11,7 @@ async function run() {
   console.log("Step 2/2: summarizing...");
   await summarize();
 
-  console.log("Done. See output/latest.json");
+  console.log("Done. See output/latest.<slug>.json for each profile.");
 }
 
 run().catch((err) => {

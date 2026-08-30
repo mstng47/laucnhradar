@@ -29,8 +29,10 @@ jobs:
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: npm run pipeline
 
-      - name: Upload digest artifact
+      - name: Upload digest artifacts
         uses: actions/upload-artifact@v4
         with:
           name: latest-digest
-          path: output/latest.json
+          # One file per profile now (output/latest.finn.json,
+          # output/latest.dawood.json, ...) — see scripts/summarize.mjs.
+          path: output/latest.*.json
