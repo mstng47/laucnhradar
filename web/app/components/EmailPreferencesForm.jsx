@@ -1,7 +1,13 @@
 ﻿"use client";
 
 import { useMemo, useState } from "react";
-import { DAY_SHORT, formatScheduleSummary } from "../lib/emailPreferences";
+import {
+  DAY_SHORT,
+  formatScheduleSummary,
+  formatTimeLabel,
+  buildTimeOptions,
+  buildTimezoneOptions,
+} from "../lib/emailPreferences";
 
 // Displayed Monday-first (the usual week view) even though the value
 // stored and sent is still 0=Sunday..6=Saturday everywhere else - this is
@@ -9,20 +15,13 @@ import { DAY_SHORT, formatScheduleSummary } from "../lib/emailPreferences";
 // lay out on screen.
 const DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
-const FALLBACK_TIMEZONES = [
-  "UTC",
-  "Europe/London",
-  "Europe/Paris",
-  "Europe/Berlin",
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "Asia/Tokyo",
-  "Asia/Singapore",
-  "Asia/Kolkata",
-  "Australia/Sydney",
-];
+// Built once per page load, not per render - both lists are a fixed size
+// (288 five-minute steps; ~25 timezone offsets) and the timezone list only
+// needs to reflect "now" once, not on every keystroke.
+const TIME_OPTIONS = buildTimeOptions();
+const TIMEZONE_OPTIONS = buildTimezoneOptions();
+const TIMEZONE_LABEL_BY_ZONE = new Map(TIMEZONE_OPTIONS.map((o) => [o.value, o.label]));
+const TIMEZONE_ZONE_BY_LABEL = new Map(TIMEZONE_OPTIONS.map((o) => [o.label, o.value]));
 
 function guessTimezone() {
   try {
@@ -40,18 +39,43 @@ export default function EmailPreferencesForm({ mode, token, initial }) {
   const [days, setDays] = useState(initial?.days ?? [1, 2, 3, 4, 5]);
   const [sendTime, setSendTime] = useState(initial?.sendTime ?? "07:30");
   const [timezone, setTimezone] = useState(initial?.timezone ?? guessTimezone());
+  // The searchable timezone field is text the user types, which only
+  // becomes the real `timezone` value once it exactly matches a known
+  // option (see handleTimezoneInput/Blur below) - kept separate so a
+  // half-typed search ("Lon...") doesn't briefly become an invalid
+  // timezone value.
+  const [tzQuery, setTzQuery] = useState(TIMEZONE_LABEL_BY_ZONE.get(timezone) ?? timezone);
   const [enabled, setEnabled] = useState(initial?.enabled ?? true);
   const [status, setStatus] = useState("idle"); // idle | saving | saved | error | unsubscribed
   const [errorMessage, setErrorMessage] = useState("");
 
-  const timezones = useMemo(() => {
-    try {
-      const all = Intl.supportedValuesOf("timeZone");
-      return all.includes(timezone) ? all : [timezone, ...all];
-    } catch {
-      return FALLBACK_TIMEZONES.includes(timezone) ? FALLBACK_TIMEZONES : [timezone, ...FALLBACK_TIMEZONES];
+  // A subscriber saved before this change (or on an odd browser default)
+  // may have a time that doesn't land on a 5-minute mark - keep it
+  // selectable rather than silently snapping their saved setting to the
+  // nearest option.
+  const timeOptions = useMemo(() => {
+    if (TIME_OPTIONS.some((o) => o.value === sendTime)) return TIME_OPTIONS;
+    return [{ value: sendTime, label: formatTimeLabel(sendTime) }, ...TIME_OPTIONS];
+  }, [sendTime]);
+
+  function handleTimezoneInput(e) {
+    const value = e.target.value;
+    setTzQuery(value);
+    const zone = TIMEZONE_ZONE_BY_LABEL.get(value);
+    if (zone) setTimezone(zone);
+  }
+
+  function handleTimezoneBlur() {
+    const zone = TIMEZONE_ZONE_BY_LABEL.get(tzQuery);
+    if (zone) {
+      setTimezone(zone);
+      return;
     }
-  }, [timezone]);
+    // Typed text didn't match a real option - fall back to whatever the
+    // last valid timezone was rather than leave a dangling, unsaveable
+    // value in the box.
+    setTzQuery(TIMEZONE_LABEL_BY_ZONE.get(timezone) ?? timezone);
+  }
 
   function toggleDay(day) {
     setDays((prev) => (prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort((a, b) => a - b)));
@@ -141,32 +165,41 @@ export default function EmailPreferencesForm({ mode, token, initial }) {
         <label className="field-label" htmlFor="send-time">
           Delivery time
         </label>
-        <input
+        <select
           id="send-time"
-          className="field-input"
-          type="time"
+          className="field-input field-select field-select-time"
           required
           value={sendTime}
           onChange={(e) => setSendTime(e.target.value)}
-        />
+        >
+          {timeOptions.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="field-group">
         <label className="field-label" htmlFor="timezone">
           Timezone
         </label>
-        <select
+        <input
           id="timezone"
-          className="field-input field-select"
-          value={timezone}
-          onChange={(e) => setTimezone(e.target.value)}
-        >
-          {timezones.map((tz) => (
-            <option key={tz} value={tz}>
-              {tz}
-            </option>
+          className="field-input"
+          type="text"
+          list="timezone-options"
+          autoComplete="off"
+          placeholder="Start typing a city..."
+          value={tzQuery}
+          onChange={handleTimezoneInput}
+          onBlur={handleTimezoneBlur}
+        />
+        <datalist id="timezone-options">
+          {TIMEZONE_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.label} />
           ))}
-        </select>
+        </datalist>
       </div>
 
       {mode === "edit" && (

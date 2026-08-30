@@ -1,25 +1,30 @@
-import { Victor_Mono } from "next/font/google";
+import { Victor_Mono, Geist } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "./components/SiteHeader";
 
-// Switched from IBM Plex Mono to Victor Mono for "personality" — semi-
-// connected cursive italics and programming ligatures, the same register
-// as Operator Mono (the commercial font this was asked for directly).
-// Operator Mono itself isn't an option: it's a paid H&Co/Type Network
-// license with no free or self-hostable distribution, so there's no
-// legal way to embed it here. Victor Mono is free (SIL OFL), built for
-// the same "cursive italic code font" niche, and is on Google Fonts so
-// it drops into the same next/font pipeline as the fonts before it.
-// Its default zero has no dot or slash — slashed variants exist only as
-// opt-in stylistic sets (ss02-ss05) — so the zero-glyph fix still holds.
-// Max weight is 700, same as the IBM Plex Mono it replaces, so the three
-// call sites in globals.css that were already dropped from 800 to 700
-// don't need to change again.
+// Victor Mono carried the whole site through the first version — every
+// headline and paragraph, not just labels. Phase 1 of the redesign
+// demoted it to a supporting role: dates, story numbers, source labels,
+// reading time and other small-caps metadata only (see --font-mono in
+// globals.css). It's free (SIL OFL) and on Google Fonts, and its default
+// zero has no dot or slash — slashed variants exist only as opt-in
+// stylistic sets (ss02-ss05).
 const victorMono = Victor_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   style: ["normal", "italic"],
   variable: "--font-victor-mono",
+  display: "swap",
+});
+
+// Geist now carries everything meant to be read — headlines, body copy,
+// buttons, nav (see --font-sans in globals.css). Also on Google Fonts,
+// so it drops into the same next/font pipeline as Victor Mono above
+// rather than adding a new dependency.
+const geistSans = Geist({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-geist-sans",
   display: "swap",
 });
 
@@ -36,7 +41,7 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={victorMono.variable}>
+    <html lang="en" className={`${victorMono.variable} ${geistSans.variable}`}>
       <body>
         <div className="bg-fixed" aria-hidden="true" />
         <SiteHeader />

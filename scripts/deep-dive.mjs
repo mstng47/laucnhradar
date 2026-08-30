@@ -57,7 +57,7 @@ way as the shorter tiers: plain paragraphs and, where genuinely useful, "- "
 bullets. No section headers, no bolded lead-in phrases.`,
 };
 
-function buildSystemPrompt(readerProfile, tier) {
+function buildSystemPrompt(readerProfile, tier, closingAngle) {
   return `You are writing a deeper, standalone explanation of one news item for a
 daily AI briefing's single reader, so they can understand it without ever
 opening the original source.
@@ -92,8 +92,7 @@ VOICE:
   sentence where it appears.
 - Include concrete specifics (figures, dates, names) where they matter, in
   your own sentences.
-- End with one short line on what this means specifically for someone
-  working in identity and access management (IAM/SAM/IGA).
+- End with one short line on ${closingAngle}.
 
 Respond with ONLY the deep-dive text itself - plain text, paragraphs
 separated by a blank line, and "- " at the start of a line for the
@@ -106,7 +105,7 @@ source and..."). Start directly with the first sentence of the content
 itself.`;
 }
 
-function buildFallbackSystemPrompt(readerProfile) {
+function buildFallbackSystemPrompt(readerProfile, closingAngle) {
   return `You are writing a deeper, standalone explanation of one news item for a
 daily AI briefing's single reader, but the original source could not be
 fetched (paywalled, blocked, or unavailable).
@@ -124,8 +123,7 @@ says, say less - never claim detail you don't actually have.
 VOICE: intelligent businessperson, not technical, plain English, dense and
 direct. No em dashes; use a comma, colon, or separate sentence instead.
 No stock AI-newsletter phrasing ("worth watching", "remains to be seen",
-"stay tuned"). End with one short line on what this means for someone
-working in identity and access management (IAM/SAM/IGA).
+"stay tuned"). End with one short line on ${closingAngle}.
 
 Respond with ONLY the text itself - no preamble, no JSON, no markdown headers.`;
 }
@@ -189,7 +187,11 @@ async function createWithRetry(params) {
   }
 }
 
-async function generateDeepDive(entry, readerProfile) {
+// closingAngle is the one-line "what this means for..." this reader's
+// deep dives end on (see scripts/profiles/index.json) — the only piece of
+// this prompt that varies per profile; everything else is generic writing
+// instruction, not specific to any one reader's industry.
+async function generateDeepDive(entry, readerProfile, closingAngle) {
   try {
     const source = await extractSourceText(entry.url);
 
@@ -203,7 +205,7 @@ async function generateDeepDive(entry, readerProfile) {
         // runs adaptive thinking by default, and thinking tokens count
         // against the same cap) and keeps cost and latency down.
         thinking: { type: "disabled" },
-        system: buildFallbackSystemPrompt(readerProfile),
+        system: buildFallbackSystemPrompt(readerProfile, closingAngle),
         messages: [{ role: "user", content: summaryBlock(entry) }],
       });
       return textFromMessage(message);
@@ -225,7 +227,7 @@ async function generateDeepDive(entry, readerProfile) {
       model: "claude-sonnet-5",
       max_tokens: maxTokens,
       thinking: { type: "disabled" },
-      system: buildSystemPrompt(readerProfile, tier),
+      system: buildSystemPrompt(readerProfile, tier, closingAngle),
       messages: [
         {
           role: "user",

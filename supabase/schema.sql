@@ -147,3 +147,158 @@ create index if not exists email_subscribers_enabled_idx
 -- the anon/publishable key the rest of the site reads with gets nothing
 -- from this table, which is the point.
 alter table email_subscribers enable row level security;
+
+
+-- Multi-reader stage 1 (see supabase/migrations/20260829120000_add_profiles.sql
+-- for the full explanation). Adds the idea of a "profile" — who a briefing
+-- is written for — without changing anything anyone currently sees: nothing
+-- reads or writes profile_id yet, and the existing "Finn" reader's rows are
+-- backfilled onto a "finn" profile row so nothing is left unowned.
+--
+-- digest_entries' existing "one row per (digest_date, url)" rule is left
+-- exactly as it is here — widening it to include profile_id is Stage 3
+-- work, done together with the scripts/summarize.mjs change that writes
+-- against the new rule. That means everything below is safe to run against
+-- the live project on its own, any time: nothing here removes or narrows
+-- anything the current pipeline depends on.
+
+create table if not exists profiles (
+  id bigint generated always as identity primary key,
+  slug text not null unique,
+  display_name text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table profiles enable row level security;
+
+drop policy if exists "Public read access" on profiles;
+create policy "Public read access"
+  on profiles
+  for select
+  to anon, authenticated
+  using (true);
+
+insert into profiles (slug, display_name)
+values ('finn', 'Finn')
+on conflict (slug) do nothing;
+
+alter table digest_entries
+  add column if not exists profile_id bigint references profiles(id);
+
+alter table glossary_terms
+  add column if not exists profile_id bigint references profiles(id);
+
+alter table email_subscribers
+  add column if not exists profile_id bigint references profiles(id);
+
+create index if not exists digest_entries_profile_id_idx on digest_entries (profile_id);
+create index if not exists glossary_terms_profile_id_idx on glossary_terms (profile_id);
+create index if not exists email_subscribers_profile_id_idx on email_subscribers (profile_id);
+
+update digest_entries
+set profile_id = (select id from profiles where slug = 'finn')
+where profile_id is null;
+
+update glossary_terms
+set profile_id = (select id from profiles where slug = 'finn')
+where profile_id is null;
+
+update email_subscribers
+set profile_id = (select id from profiles where slug = 'finn')
+where profile_id is null;
+
+-- Not done here: digest_entries keeps its existing "one row per
+-- (digest_date, url)" rule untouched. Widening it to (digest_date, url,
+-- profile_id) is Stage 3 work, landing together with the summarize.mjs
+-- change that writes against the new rule instead of this one.
+
+
+-- Multi-reader stage 3 (see
+-- supabase/migrations/20260829140000_stage3_widen_uniqueness.sql for the
+-- full explanation). Ships together with the scripts/summarize.mjs and
+-- scripts/deep-dive.mjs changes that write against the rules widened
+-- below — applying this on its own is fine, but the pipeline code must
+-- not go out ahead of it, or its next run fails outright.
+
+update digest_entries
+set profile_id = (select id from profiles where slug = 'finn')
+where profile_id is null;
+
+update glossary_terms
+set profile_id = (select id from profiles where slug = 'finn')
+where profile_id is null;
+
+update email_subscribers
+set profile_id = (select id from profiles where slug = 'finn')
+where profile_id is null;
+
+insert into profiles (slug, display_name)
+values ('dawood', 'Dawood test reader')
+on conflict (slug) do nothing;
+
+do $$
+declare
+  old_constraint_name text;
+begin
+  select tc.constraint_name into old_constraint_name
+  from information_schema.table_constraints tc
+  where tc.table_name = 'digest_entries'
+    and tc.constraint_type = 'UNIQUE'
+    and (
+      select array_agg(kcu.column_name::text order by kcu.column_name)
+      from information_schema.key_column_usage kcu
+      where kcu.constraint_name = tc.constraint_name
+        and kcu.table_name = 'digest_entries'
+    ) = array['digest_date', 'url']::text[]
+  limit 1;
+
+  if old_constraint_name is not null then
+    execute format('alter table digest_entries drop constraint %I', old_constraint_name);
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'digest_entries_date_url_profile_key'
+  ) then
+    alter table digest_entries
+      add constraint digest_entries_date_url_profile_key
+      unique (digest_date, url, profile_id);
+  end if;
+end $$;
+
+-- glossary_terms: one row per term GLOBALLY becomes one row per
+-- (profile, term) — Finn and Dawood each need their own "already
+-- explained this" record, even for the exact same term.
+do $$
+declare
+  old_constraint_name text;
+begin
+  select tc.constraint_name into old_constraint_name
+  from information_schema.table_constraints tc
+  where tc.table_name = 'glossary_terms'
+    and tc.constraint_type = 'UNIQUE'
+    and (
+      select array_agg(kcu.column_name::text order by kcu.column_name)
+      from information_schema.key_column_usage kcu
+      where kcu.constraint_name = tc.constraint_name
+        and kcu.table_name = 'glossary_terms'
+    ) = array['term_key']::text[]
+  limit 1;
+
+  if old_constraint_name is not null then
+    execute format('alter table glossary_terms drop constraint %I', old_constraint_name);
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'glossary_terms_profile_term_key'
+  ) then
+    alter table glossary_terms
+      add constraint glossary_terms_profile_term_key
+      unique (profile_id, term_key);
+  end if;
+end $$;

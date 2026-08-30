@@ -47,56 +47,45 @@ export default function BriefingList({ entries }) {
     <>
       <ol className="story-list">
         {visible.map((entry, index) => (
+          // The first story gets .story-lead — same card, more weight
+          // (globals.css) — rather than a separate component, so the
+          // "greater visual importance" is purely a CSS modifier on the
+          // one story template.
           <li
-            className={`story${justRevealedFrom !== null && index >= justRevealedFrom ? " story-just-added" : ""}`}
+            className={`story${index === 0 ? " story-lead" : ""}${justRevealedFrom !== null && index >= justRevealedFrom ? " story-just-added" : ""}`}
             key={entry.id}
           >
-            <div className="story-head">
+            {/* Identity/provenance stated up front — index, source,
+                read time — before the headline, rather than filed away
+                in a meta row at the bottom of the card. */}
+            <div className="story-meta-top">
               <span className="story-index" aria-hidden="true">
                 {String(index + 1).padStart(2, "0")}
                 <span className="story-index-total"> / {total}</span>
               </span>
-              <a
-                className="story-headline"
-                href={entry.url}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                {entry.headline}
-              </a>
+              <span className="meta-dot">·</span>
+              <span className="story-source-name">{entry.source}</span>
+              {Number.isFinite(entry.article_read_minutes) && (
+                <>
+                  <span className="meta-dot">·</span>
+                  <span className="story-read-time">{entry.article_read_minutes} min</span>
+                </>
+              )}
             </div>
+
+            <a className="story-headline" href={entry.url} target="_blank" rel="noreferrer noopener">
+              {entry.headline}
+            </a>
 
             <p className="story-summary">{entry.what_happened}</p>
 
             <div className="story-angle">
-              <span className="story-angle-label">Why it matters</span>
+              <span className="story-angle-label">Why it matters to you</span>
               <p>{entry.why_it_matters}</p>
             </div>
 
-            <div className="story-meta">
-              {entry.new_terms?.length > 0 && (
-                <div className="chips">
-                  {entry.new_terms.map((term) => (
-                    <span key={term.term} className="chip" title={term.definition}>
-                      {term.term}
-                    </span>
-                  ))}
-                </div>
-              )}
-              <a
-                className="story-source"
-                href={entry.url}
-                target="_blank"
-                rel="noreferrer noopener"
-              >
-                <span>{entry.source}</span>
-                {Number.isFinite(entry.article_read_minutes) && (
-                  <span>· {entry.article_read_minutes} min</span>
-                )}
-                <span className="story-source-arrow" aria-hidden="true">
-                  ↗
-                </span>
-              </a>
+            <div className="story-actions">
+              <DeepDive text={entry.deep_dive} />
               <SaveButton
                 id={entry.id}
                 headline={entry.headline}
@@ -104,7 +93,12 @@ export default function BriefingList({ entries }) {
                 source={entry.source}
                 digestDate={entry.digest_date}
               />
-              <DeepDive text={entry.deep_dive} />
+              <a className="story-source-link" href={entry.url} target="_blank" rel="noreferrer noopener">
+                Source
+                <span className="story-source-arrow" aria-hidden="true">
+                  ↗
+                </span>
+              </a>
             </div>
           </li>
         ))}

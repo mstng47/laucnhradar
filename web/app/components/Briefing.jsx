@@ -1,13 +1,14 @@
 import BriefingList from "./BriefingList";
 import CompactList from "./CompactList";
 import StoryReveal from "./StoryReveal";
+import BriefingComplete from "./BriefingComplete";
 import { groupSections } from "../lib/format";
 
-// Single column, sections stacked in reading order: the full-detail
-// stories first (framed by BriefingOpen above this component, not a
-// heading in here), then the two compact one-liner sections. No sidebar —
-// a wide screen just gets a wider centred column (see --content-width),
-// not a second column competing for attention.
+// Sections stacked in reading order: the full-detail stories first,
+// under their own "TODAY'S BRIEFING" title, then Launches and Radar —
+// each visually distinct from the main briefing and from each other
+// (see CompactList's variant prop). Section ids match the rail's anchor
+// nav (Briefing / Launches / Radar in BriefingRail.jsx).
 export default function Briefing({ entries }) {
   const { main, launches, also } = groupSections(entries);
 
@@ -15,21 +16,28 @@ export default function Briefing({ entries }) {
     <>
       <StoryReveal />
 
-      {main.length > 0 && <BriefingList entries={main} />}
+      {main.length > 0 && (
+        <section id="briefing">
+          <h2 className="briefing-section-title">Today&apos;s Briefing</h2>
+          <BriefingList entries={main} />
+        </section>
+      )}
 
       {launches.length > 0 && (
-        <section>
+        <section id="launches">
           <h2 className="section-heading-light">New launches</h2>
-          <CompactList entries={launches} />
+          <CompactList entries={launches} variant="launches" />
         </section>
       )}
 
       {also.length > 0 && (
-        <section>
-          <h2 className="section-heading-light">Also worth knowing</h2>
-          <CompactList entries={also} />
+        <section id="radar">
+          <h2 className="section-heading-light">Radar</h2>
+          <CompactList entries={also} variant="radar" />
         </section>
       )}
+
+      <BriefingComplete />
     </>
   );
 }

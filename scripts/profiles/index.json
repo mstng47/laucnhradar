@@ -1,0 +1,14 @@
+[
+  {
+    "slug": "finn",
+    "displayName": "Finn",
+    "file": "finn.md",
+    "closingAngle": "what this means for someone working in identity and access management (IAM/SAM/IGA)"
+  },
+  {
+    "slug": "dawood",
+    "displayName": "Dawood test reader",
+    "file": "dawood.md",
+    "closingAngle": "what this means for an AI automations and operations analyst at Dawood, evaluating tools and workflows for the firm and its portfolio companies"
+  }
+]

@@ -1,5 +1,6 @@
-// Sends raw.json to Claude, gets back a personalized briefing for the one
-// reader described in reader-profile.md, writes output/latest.json.
+// Sends raw.json to Claude once per active reader profile (see
+// scripts/profiles/index.json), getting back a personalized briefing for
+// each one and writing output/latest.<slug>.json per profile.
 
 // Must load first — deep-dive.mjs reads ANTHROPIC_API_KEY when it's
 // imported (to construct its own Anthropic client), which happens before
@@ -14,10 +15,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
 import { estimateArticleReadingMinutes } from "./article-reading-time.mjs";
 import { generateDeepDive } from "./deep-dive.mjs";
+import { loadActiveProfiles } from "./lib/profiles.mjs";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const READER_PROFILE_PATH = new URL("./reader-profile.md", import.meta.url);
 const RECENT_COVERAGE_DAYS = 14;
 
 // The prompt already asks for these limits, but asking is not enforcing —
@@ -32,27 +33,7 @@ const RECENT_COVERAGE_DAYS = 14;
 // have that much worth including.
 const SECTION_CAPS = { main: 8, launch: 5, also: 3 };
 
-async function loadReaderProfile() {
-  const raw = await readFile(READER_PROFILE_PATH, "utf-8");
-  // Everything above the "---" divider is a note for human editors, not
-  // part of the profile itself — strip it before it reaches the prompt.
-  const afterDivider = raw.split(/^---$/m)[1];
-  return (afterDivider ?? raw).trim();
-}
-
-function buildSystemPrompt(readerProfile, knownTerms, recentCoverage) {
-  const knownTermsSection =
-    knownTerms.length > 0
-      ? `
-TERMS THE READER ALREADY KNOWS:
-${knownTerms.map((t) => `- ${t}`).join("\n")}
-
-These have already been explained to this reader in previous briefings. They
-already know them. Do NOT define any of these again in new_terms. Only define
-terms that are genuinely new to them.
-`
-      : "";
-
+function buildSystemPrompt(readerProfile, recentCoverage) {
   const recentCoverageSection =
     recentCoverage.length > 0
       ? `
@@ -73,7 +54,7 @@ ${recentCoverage.map((e) => `- ${e.headline} — ${e.url}`).join("\n")}
 
 READER PROFILE:
 ${readerProfile}
-${knownTermsSection}${recentCoverageSection}
+${recentCoverageSection}
 Organize your selections into three sections. These are hard maximums, not
 targets — the site shows the first 5 "main" items and all of "launches"/
 "also" by default in under two minutes before work, and every extra item
@@ -110,8 +91,6 @@ For "main" items, write:
 - headline: plain English, no jargon, max 10 words
 - what_happened: one sentence, as if explaining to a smart friend who doesn't work in tech
 - why_it_matters: one sentence, specific to this reader's field and role — not generic importance
-- new_terms: any term this reader likely wouldn't know, with a one-line plain
-  definition. Omit this key (or use an empty array) if there are none.
 
 For "launches" items, write:
 - name: the product's name
@@ -122,7 +101,7 @@ For "also" items, write:
 - summary: ONE plain-English sentence
 
 Rules:
-- Never use jargon without defining it in new_terms (main section only)
+- Never use jargon without a plain-English explanation in the same sentence
 - No hype language ("game-changing", "revolutionary", "massive")
 - No em dashes (—) anywhere, in any field. Use a comma, a colon, parentheses,
   or a separate sentence instead.
@@ -135,7 +114,7 @@ Rules:
   two minutes
 
 Respond with ONLY a JSON object, no other text, in this exact shape:
-{"main": [{"headline": "...", "url": "...", "source": "...", "what_happened": "...", "why_it_matters": "...", "new_terms": [{"term": "...", "definition": "..."}]}], "launches": [{"name": "...", "url": "...", "source": "...", "what_it_does": "..."}], "also": [{"headline": "...", "url": "...", "source": "...", "summary": "..."}]}`;
+{"main": [{"headline": "...", "url": "...", "source": "...", "what_happened": "...", "why_it_matters": "..."}], "launches": [{"name": "...", "url": "...", "source": "...", "what_it_does": "..."}], "also": [{"headline": "...", "url": "...", "source": "...", "summary": "..."}]}`;
 }
 
 // Returns null when Supabase isn't configured, so local runs still work.
@@ -144,26 +123,13 @@ function getSupabase() {
   return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY);
 }
 
-async function loadKnownTerms() {
-  const supabase = getSupabase();
-  if (!supabase) return [];
-
-  const { data, error } = await supabase.from("glossary_terms").select("term");
-  if (error) {
-    // A missing glossary table shouldn't stop the briefing going out; the
-    // worst case is a term gets explained twice.
-    console.warn(`Couldn't load glossary (${error.message}) — continuing without it.`);
-    return [];
-  }
-  return (data ?? []).map((row) => row.term);
-}
-
 // The database only stops the exact same URL being saved twice on the same
-// day — it says nothing about repeats across days. This is what feeds the
-// model enough of its own recent output to avoid covering the same story
-// again, whether via the same link or a different outlet's writeup of it.
-async function loadRecentCoverage() {
-  const supabase = getSupabase();
+// day for the same profile — it says nothing about repeats across days.
+// This is what feeds the model enough of its own recent output, for THIS
+// profile only, to avoid covering the same story again, whether via the
+// same link or a different outlet's writeup of it. Scoped to one profile —
+// Finn's and Dawood's histories must never leak into each other's runs.
+async function loadRecentCoverage(supabase, profileId) {
   if (!supabase) return [];
 
   const since = new Date(Date.now() - RECENT_COVERAGE_DAYS * 24 * 60 * 60 * 1000)
@@ -173,6 +139,7 @@ async function loadRecentCoverage() {
   const { data, error } = await supabase
     .from("digest_entries")
     .select("headline, url")
+    .eq("profile_id", profileId)
     .gte("digest_date", since);
 
   if (error) {
@@ -182,47 +149,12 @@ async function loadRecentCoverage() {
   return data ?? [];
 }
 
-async function saveNewTerms(output) {
-  const supabase = getSupabase();
-  if (!supabase) return;
-
-  const byKey = new Map();
-  for (const entry of output.entries) {
-    for (const t of entry.new_terms ?? []) {
-      if (!t?.term || !t?.definition) continue;
-      const key = t.term.trim().toLowerCase();
-      if (!byKey.has(key)) {
-        byKey.set(key, {
-          term_key: key,
-          term: t.term.trim(),
-          definition: t.definition.trim(),
-          first_seen_date: output.date,
-        });
-      }
-    }
-  }
-  if (byKey.size === 0) return;
-
-  // ignoreDuplicates keeps the definition the reader first learned, rather
-  // than overwriting it with a later rewording of the same term.
-  const { error } = await supabase
-    .from("glossary_terms")
-    .upsert([...byKey.values()], { onConflict: "term_key", ignoreDuplicates: true });
-
-  if (error) {
-    console.warn(`Couldn't save new glossary terms (${error.message}).`);
-    return;
-  }
-  console.log(`Glossary: saved up to ${byKey.size} new term(s).`);
-}
-
 // Claude replies with three separate arrays, shaped for what each section
-// actually needs (a launch has no "why it matters"; "also" has no terms).
-// Flattening them here — onto the same headline/what_happened/why_it_matters/
-// new_terms fields the "main" section already uses, just tagged with which
-// section they came from — means everything downstream (Supabase writes,
-// glossary extraction, reading-time estimation) stays a single flat list
-// instead of needing three separate code paths.
+// actually needs (a launch has no "why it matters"). Flattening them here —
+// onto the same headline/what_happened/why_it_matters fields the "main"
+// section already uses, just tagged with which section they came from —
+// means everything downstream (Supabase writes, reading-time estimation)
+// stays a single flat list instead of needing three separate code paths.
 function flattenSections(raw) {
   // Cap here, not just in the prompt wording — a "3 to 5" or "up to N" in
   // English is a request, not a constraint the model reliably honours.
@@ -246,7 +178,6 @@ function flattenSections(raw) {
     source: e.source,
     what_happened: e.what_happened,
     why_it_matters: e.why_it_matters,
-    new_terms: e.new_terms ?? [],
   }));
   const launches = rawLaunches.map((e) => ({
     section: "launch",
@@ -255,7 +186,6 @@ function flattenSections(raw) {
     source: e.source,
     what_happened: e.what_it_does,
     why_it_matters: null,
-    new_terms: [],
   }));
   const also = rawAlso.map((e) => ({
     section: "also",
@@ -264,7 +194,6 @@ function flattenSections(raw) {
     source: e.source,
     what_happened: e.summary,
     why_it_matters: null,
-    new_terms: [],
   }));
 
   // Guard against an occasional malformed item (a missing field from the
@@ -281,17 +210,15 @@ function flattenSections(raw) {
   return valid;
 }
 
-async function summarize(rawItems, knownTerms = [], recentCoverage = []) {
-  const readerProfile = await loadReaderProfile();
+async function summarize(rawItems, readerProfile, recentCoverage = []) {
   const message = await anthropic.messages.create({
     // Sonnet for the judgment this job needs: deciding what's genuinely
     // relevant to one reader, and writing it in plain English without jargon.
     model: "claude-sonnet-5",
-    // Three sections' worth of fields, plus term definitions, runs long;
-    // 2000 truncated mid-string and surfaced only as a confusing JSON parse
-    // error.
+    // Three sections' worth of fields runs long; 2000 truncated mid-string
+    // and surfaced only as a confusing JSON parse error.
     max_tokens: 8000,
-    system: buildSystemPrompt(readerProfile, knownTerms, recentCoverage),
+    system: buildSystemPrompt(readerProfile, recentCoverage),
     messages: [{ role: "user", content: JSON.stringify(rawItems) }],
   });
 
@@ -319,10 +246,10 @@ async function summarize(rawItems, knownTerms = [], recentCoverage = []) {
   return flattenSections(parsed);
 }
 
-async function saveToSupabase(output) {
+async function saveToSupabase(supabase, output, profileId) {
   const inCI = process.env.GITHUB_ACTIONS === "true";
 
-  if (!process.env.SUPABASE_URL || !process.env.SUPABASE_KEY) {
+  if (!supabase) {
     const message =
       "SUPABASE_URL/SUPABASE_KEY not set — skipping Supabase write. " +
       "Check the secret names match exactly (Settings → Secrets and variables → Actions).";
@@ -336,18 +263,12 @@ async function saveToSupabase(output) {
     return;
   }
 
-  console.log(
-    `Connecting to Supabase at ${process.env.SUPABASE_URL} with a ${process.env.SUPABASE_KEY.length}-char key…`
-  );
-
-  const supabase = getSupabase();
-
   const rows = output.entries.map((entry) => ({
     digest_date: output.date,
+    profile_id: profileId,
     headline: entry.headline,
     what_happened: entry.what_happened,
     why_it_matters: entry.why_it_matters,
-    new_terms: entry.new_terms ?? null,
     url: entry.url,
     source: entry.source,
     article_read_minutes: entry.article_read_minutes ?? null,
@@ -355,9 +276,14 @@ async function saveToSupabase(output) {
     deep_dive: entry.deep_dive ?? null,
   }));
 
+  // Uniqueness is (digest_date, url, profile_id) once the Stage 3 migration
+  // lands, not (digest_date, url) alone — two profiles can each have their
+  // own row for the same story on the same day. This upsert target only
+  // works once that migration has actually been applied; see the Stage 3
+  // notes for why this ships together with that migration, not before it.
   const { data, error } = await supabase
     .from("digest_entries")
-    .upsert(rows, { onConflict: "digest_date,url" })
+    .upsert(rows, { onConflict: "digest_date,url,profile_id" })
     .select();
 
   if (error) {
@@ -378,9 +304,64 @@ async function saveToSupabase(output) {
   }
 
   const savedCount = data?.length ?? rows.length;
-  const message = `Saved ${savedCount} entries → Supabase (digest_entries) for ${output.date}`;
+  const message = `Saved ${savedCount} entries → Supabase (digest_entries, profile_id=${profileId}) for ${output.date}`;
   console.log(message);
   if (inCI) console.log(`::notice::${message}`);
+}
+
+// Runs the full pick-and-write step for one profile: loads that profile's
+// own recent-coverage history (never another profile's), asks Claude for
+// that profile's digest, enriches "main" items with reading time and a
+// deep dive written in that profile's voice, and saves everything stamped
+// with that profile's id.
+async function runForProfile(supabase, profile, rawItems) {
+  console.log(`\n--- ${profile.displayName} (${profile.slug}) ---`);
+
+  const recentCoverage = await loadRecentCoverage(supabase, profile.id);
+  if (recentCoverage.length > 0) {
+    console.log(
+      `Recent coverage: excluding ${recentCoverage.length} item(s) from the last ${RECENT_COVERAGE_DAYS} days for ${profile.slug}.`
+    );
+  }
+
+  const digest = await summarize(rawItems, profile.text, recentCoverage);
+
+  // Best-effort and fully parallel — one slow or blocked article can't hold
+  // up the others, and neither reading-time estimation nor deep-dive
+  // generation can fail the run (see article-reading-time.mjs and
+  // deep-dive.mjs). Only "main" items get either — launches and "also worth
+  // knowing" are one-line quick scans, not full articles the reader is
+  // being sent to read or might want to expand.
+  const mainCount = digest.filter((e) => e.section === "main").length;
+  console.log(`Enriching ${mainCount} main item(s) for ${profile.slug} with reading time and a deep dive...`);
+  const digestWithReadingTime = await Promise.all(
+    digest.map(async (entry) => {
+      if (entry.section !== "main") {
+        return { ...entry, article_read_minutes: null, deep_dive: null, profile_id: profile.id };
+      }
+      const [article_read_minutes, deep_dive] = await Promise.all([
+        estimateArticleReadingMinutes(entry.url),
+        generateDeepDive(entry, profile.text, profile.closingAngle),
+      ]);
+      return { ...entry, article_read_minutes, deep_dive, profile_id: profile.id };
+    })
+  );
+
+  const output = {
+    date: new Date().toISOString().slice(0, 10),
+    generatedAt: new Date().toISOString(),
+    profileSlug: profile.slug,
+    profileId: profile.id,
+    entries: digestWithReadingTime,
+  };
+
+  const outputPath = `output/latest.${profile.slug}.json`;
+  await writeFile(outputPath, JSON.stringify(output, null, 2));
+  console.log(`Summarized ${digest.length} entries for ${profile.slug} → ${outputPath}`);
+
+  await saveToSupabase(supabase, output, profile.id);
+
+  return output;
 }
 
 async function main() {
@@ -391,55 +372,14 @@ async function main() {
     return;
   }
 
-  const knownTerms = await loadKnownTerms();
-  if (knownTerms.length > 0) {
-    console.log(`Glossary: reader already knows ${knownTerms.length} term(s).`);
+  const supabase = getSupabase();
+  const profiles = await loadActiveProfiles(supabase);
+
+  const outputs = [];
+  for (const profile of profiles) {
+    outputs.push(await runForProfile(supabase, profile, raw.items));
   }
-
-  const recentCoverage = await loadRecentCoverage();
-  if (recentCoverage.length > 0) {
-    console.log(
-      `Recent coverage: excluding ${recentCoverage.length} item(s) from the last ${RECENT_COVERAGE_DAYS} days.`
-    );
-  }
-
-  const digest = await summarize(raw.items, knownTerms, recentCoverage);
-
-  // Best-effort and fully parallel — one slow or blocked article can't hold
-  // up the others, and neither reading-time estimation nor deep-dive
-  // generation can fail the run (see article-reading-time.mjs and
-  // deep-dive.mjs). Only "main" items get either — launches and "also worth
-  // knowing" are one-line quick scans, not full articles the reader is
-  // being sent to read or might want to expand.
-  const mainCount = digest.filter((e) => e.section === "main").length;
-  console.log(`Enriching ${mainCount} main item(s) with reading time and a deep dive...`);
-  const readerProfile = await loadReaderProfile();
-  const digestWithReadingTime = await Promise.all(
-    digest.map(async (entry) => {
-      if (entry.section !== "main") {
-        return { ...entry, article_read_minutes: null, deep_dive: null };
-      }
-      const [article_read_minutes, deep_dive] = await Promise.all([
-        estimateArticleReadingMinutes(entry.url),
-        generateDeepDive(entry, readerProfile),
-      ]);
-      return { ...entry, article_read_minutes, deep_dive };
-    })
-  );
-
-  const output = {
-    date: new Date().toISOString().slice(0, 10),
-    generatedAt: new Date().toISOString(),
-    entries: digestWithReadingTime,
-  };
-
-  await writeFile("output/latest.json", JSON.stringify(output, null, 2));
-  console.log(`Summarized ${digest.length} entries → output/latest.json`);
-
-  await saveToSupabase(output);
-  await saveNewTerms(output);
-
-  return output;
+  return outputs;
 }
 
 // Run main() only when executed directly, not when imported.
@@ -449,4 +389,4 @@ if (process.argv[1] && import.meta.url === (await import("url")).pathToFileURL(p
   main();
 }
 
-export { main, summarize };
+export { main, summarize, runForProfile };

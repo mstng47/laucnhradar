@@ -1,6 +1,10 @@
-export default function CompactList({ entries }) {
+// variant distinguishes Launches (a compact, fast-scanning grid of
+// tiles) from Radar (a dense, quieter list) — same markup either way,
+// see the .brief-list--launches / .brief-list--radar rules in
+// globals.css for what actually changes.
+export default function CompactList({ entries, variant }) {
   return (
-    <ul className="brief-list">
+    <ul className={`brief-list${variant ? ` brief-list--${variant}` : ""}`}>
       {entries.map((entry) => (
         <li className="brief-row" key={entry.id}>
           <div className="brief-row-head">

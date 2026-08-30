@@ -16,8 +16,9 @@ that matter to that reader and rewrites them in plain English.
    ```
    npm run pipeline
    ```
-5. Check `output/latest.json` — that's the briefing. If `SUPABASE_URL`/`SUPABASE_KEY`
-   are set, the same entries are also saved to Supabase for the website to read.
+5. Check `output/latest.<slug>.json` (one per profile, e.g. `output/latest.finn.json`)
+   — that's the briefing. If `SUPABASE_URL`/`SUPABASE_KEY` are set, the same entries
+   are also saved to Supabase for the website to read.
 
 ## Where to get each key
 
@@ -33,10 +34,12 @@ The news feeds and Hacker News need no keys.
 
 ```
 config/sources.json      → which feeds to read; edit to add or remove sources
-scripts/reader-profile.md → who the briefing is written for; edit any time
+scripts/profiles/        → one file per reader (see index.json for the full list);
+                           who each briefing is written for, edit any time
 collect.mjs              → pulls recent items from the configured sources into output/raw.json
-summarize.mjs            → sends raw items + reader profile + known glossary terms to Claude,
-                           writes output/latest.json, saves entries and new terms to Supabase
+summarize.mjs            → sends raw items + each profile's reader text to Claude, once
+                           per profile, writing output/latest.<slug>.json and saving
+                           entries to Supabase
 run-pipeline.mjs         → runs both steps in sequence
 check-sources.mjs        → checks every feed in sources.json still works (`npm run check-sources`)
 ```
@@ -58,13 +61,6 @@ web/app/api/unsubscribe/  → one-click unsubscribe (also wired for RFC 8058)
 
 See [MANUAL_STEPS.md](MANUAL_STEPS.md) for the one-time Resend/Supabase
 setup this needs before it can actually send mail.
-
-## Glossary
-
-Terms the briefing explains are saved to the `glossary_terms` table. Each run
-loads them first and tells Claude the reader already knows them, so the same
-jargon isn't explained twice. There's no dedicated page for it — defined
-terms show up inline as chips within the briefing items that introduce them.
 
 ## Website
 

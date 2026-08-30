@@ -1,9 +1,12 @@
 import Link from "next/link";
-import ContentFrame from "../components/ContentFrame";
-import PageIntro from "../components/PageIntro";
-import { getArchiveDates } from "../lib/data";
-import { formatDate } from "../lib/format";
+import ContentFrame from "../../components/ContentFrame";
+import PageIntro from "../../components/PageIntro";
+import { getArchiveDates } from "../../lib/data";
+import { formatDate } from "../../lib/format";
 
+// Mirrors /archive, scoped to the "dawood" profile — see
+// web/app/dawood/page.jsx for why this is a separate literal route
+// rather than a dynamic "/[profile]" one.
 export const dynamic = "force-dynamic";
 
 export const metadata = {
@@ -11,12 +14,12 @@ export const metadata = {
   description: "Every past briefing, by date",
 };
 
-export default async function Archive() {
+export default async function DawoodArchive() {
   let dates;
   let loadError;
 
   try {
-    dates = await getArchiveDates("finn");
+    dates = await getArchiveDates("dawood");
   } catch (err) {
     loadError = err.message;
   }
@@ -24,7 +27,7 @@ export default async function Archive() {
   return (
     <ContentFrame>
       <p className="back-row container">
-        <Link href="/" className="back-link">
+        <Link href="/dawood" className="back-link">
           ← Today&apos;s briefing
         </Link>
       </p>
@@ -39,7 +42,7 @@ export default async function Archive() {
           <ul className="archive-list">
             {dates.map(({ date, count }) => (
               <li key={date}>
-                <Link href={`/archive/${date}`} className="archive-row">
+                <Link href={`/dawood/archive/${date}`} className="archive-row">
                   <span className="archive-date">{formatDate(date, { weekday: "long" })}</span>
                   <span className="archive-count">
                     {count} item{count === 1 ? "" : "s"}
