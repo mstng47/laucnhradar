@@ -5,7 +5,10 @@ import { useState } from "react";
 // The deep-dive text arrives as plain text: paragraphs separated by a blank
 // line, with "- " lines for the occasional bullet list (see the prompt in
 // scripts/deep-dive.mjs). This turns that back into real <p>/<ul> markup
-// instead of dumping it into one unbroken block.
+// instead of dumping it into one unbroken block. No heading/section
+// parsing here on purpose — the generation prompt explicitly forbids
+// markdown headers ("no ## headers") and strips any that slip through,
+// so this content never actually contains them to style.
 function renderDeepDiveText(text) {
   return text
     .split(/\n{2,}/)
@@ -57,7 +60,12 @@ export default function DeepDive({ text }) {
       </button>
       {open && (
         <div className="deep-dive-content">
-          <div className="deep-dive-content-inner">{renderDeepDiveText(text)}</div>
+          <div className="deep-dive-content-inner">
+            <span className="deep-dive-label" aria-hidden="true">
+              Analyst note
+            </span>
+            {renderDeepDiveText(text)}
+          </div>
         </div>
       )}
     </div>
